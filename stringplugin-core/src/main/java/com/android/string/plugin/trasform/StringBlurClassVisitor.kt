@@ -28,6 +28,21 @@ class StringBlurClassVisitor(
         super.visit(version, access, name, signature, superName, interfaces)
     }
 
+    override fun visitEnd() {
+        if (controller.isVisitClInitMethod()) {
+            controller.visitEnd(
+                super.visitMethod(
+                    Opcodes.ACC_STATIC,
+                    "<clinit>",
+                    "()V",
+                    null,
+                    null
+                )
+            )
+        }
+        super.visitEnd()
+    }
+
     override fun visitField(
         access: Int,
         name: String?,
@@ -35,7 +50,7 @@ class StringBlurClassVisitor(
         signature: String?,
         value: Any?
     ): FieldVisitor {
-        controller.visitField(this, access, name, descriptor, value.toString())
+        controller.visitField(access, name, descriptor, value.toString())
         return super.visitField(access, name, descriptor, signature, value)
     }
 

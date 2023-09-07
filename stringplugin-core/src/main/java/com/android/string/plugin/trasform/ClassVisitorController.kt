@@ -4,7 +4,6 @@ import com.android.string.plugin.field.StringFiled
 import com.android.string.plugin.stringblur.MD5
 import com.android.string.plugin.stringblur.StringEncodeImpl
 import com.android.string.plugin.task.StringBlurTaskData
-import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
@@ -17,40 +16,72 @@ class ClassVisitorController(data: StringBlurTaskData, private val key: String) 
         "${data.applicationId}.${data.pkg}.${data.alias}".replace(".", "/")
     var currentClassName: String? = null
     private val stringEncodeImpl = StringEncodeImpl()
-    fun visitField(cv: ClassVisitor, access: Int, name: String?, desc: String?, value: String?) {
+    private val fields = mutableListOf<StringFiled>()
+    private var isClInitExists = false
+    fun visitField(access: Int, name: String?, desc: String?, value: String?) {
         if (name.isNullOrBlank() || desc != StringFiled.DESC) {
             return
         }
-        val isStaticFinalField =
+        val isStaticFinalFiled =
             (access and Opcodes.ACC_STATIC) != 0 && (access and Opcodes.ACC_FINAL) != 0
-        if (isStaticFinalField) {
-            writeStaticFinalField(cv, name, value!!)
+        if (isStaticFinalFiled) {
+            fields += StringFiled(name, value)
         }
     }
 
-    private fun writeStaticFinalField(cv: ClassVisitor, name: String, value: String) {
-        val mv = cv.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null)
-        write(value, mv)
-        mv.visitFieldInsn(Opcodes.PUTSTATIC, currentClassName, name, StringFiled.DESC)
+    fun visitEnd(mv: MethodVisitor) {
+        mv.visitCode()
+        fields.forEach {
+            if (!overflow(it.value)) {
+                return@forEach
+            }
+            write(it.value, mv)
+            mv.visitFieldInsn(Opcodes.PUTSTATIC, currentClassName, it.name, StringFiled.DESC)
+        }
         mv.visitInsn(Opcodes.RETURN)
         mv.visitMaxs(1, 0)
+        mv.visitEnd()
+    }
+
+    fun isVisitClInitMethod(): Boolean {
+        return !isClInitExists && fields.isNotEmpty()
     }
 
     fun visitMethod(mv: MethodVisitor, name: String?): MethodVisitor {
+        isClInitExists = name == "<clinit>"
         return object : MethodVisitor(Opcodes.ASM9, mv) {
             override fun visitLdcInsn(value: Any?) {
-                if (value is String && overflow(value) && name != "<clinit>") {
+                if (value is String && overflow(value) && !isClInitExists) {
                     write(value, mv)
                 } else {
                     super.visitLdcInsn(value)
                 }
             }
+
+            override fun visitCode() {
+                super.visitCode()
+                if (isClInitExists) {
+                    fields.forEach {
+                        if (!overflow(it.value)) {
+                            return@forEach
+                        }
+                        write(it.value, mv)
+                        super.visitFieldInsn(
+                            Opcodes.PUTSTATIC,
+                            currentClassName,
+                            it.name,
+                            StringFiled.DESC
+                        )
+                    }
+                }
+            }
         }
     }
 
-    fun overflow(data: String) = stringEncodeImpl.overflow(data, key)
 
-    private fun write(data: String, mv: MethodVisitor) {
+    private fun overflow(data: String?) = stringEncodeImpl.overflow(data, key)
+
+    private fun write(data: String?, mv: MethodVisitor) {
         val encodeKey = MD5.getMessageDigest(key.toByteArray())
         val encodeText = stringEncodeImpl.encrypt(data, encodeKey)
         mv.visitLdcInsn(encodeText)
