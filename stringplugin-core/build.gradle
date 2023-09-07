@@ -1,0 +1,46 @@
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'maven-publish'
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation "org.ow2.asm:asm:9.5"
+    implementation "com.squareup:javawriter:2.5.1"
+    implementation "com.android.tools.build:gradle:8.1.1"
+
+}
+
+javaToolchains {
+    version JavaVersion.VERSION_1_8
+}
+
+publishing {
+    publications {
+        StringBlurPlugin(MavenPublication) {
+            from components.java
+            groupId "com.android.string.plugin"
+            artifactId "stringblur"
+            version "1.0.0"
+        }
+    }
+    //local
+//    repositories {
+//        maven {
+//            url '../repo'
+//        }
+//    }
+    //remote
+    repositories {
+        maven {
+            url "http://47.106.160.86:8081/repository/wellresion-maven/"
+            credentials {
+                username 'cleantools'
+                password 's4jd59&a'
+            }
+            allowInsecureProtocol true
+        }
+    }
+}

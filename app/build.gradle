@@ -1,0 +1,61 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'stringblur'
+}
+
+Properties props = new Properties()
+props.load(new FileInputStream(file("keystore/CleanSwipe.properties")))
+android {
+    namespace 'com.example.myapplication'
+    compileSdk 34
+    signingConfigs {
+        CleanSwipe {
+            keyAlias props['KEY_ALIAS']
+            keyPassword props['KEY_PASSWORD']
+            storeFile file(props['STORE_FILE'])
+            storePassword props['STORE_PASSWORD']
+        }
+    }
+    defaultConfig {
+        applicationId "com.example.myapplication"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+        signingConfig signingConfigs.CleanSwipe
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildFeatures {
+        buildConfig true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+stringblur {
+    key "gc2RibGA6EQObn0w"
+    enable true
+    whiteList = []
+    pkg "encode.test.fafaf"
+    alias "ZiFuChuanEncode"
+}
