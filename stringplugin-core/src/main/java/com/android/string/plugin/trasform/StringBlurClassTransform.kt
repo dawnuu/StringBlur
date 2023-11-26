@@ -18,9 +18,16 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
     companion object {
         private lateinit var key: String
         private lateinit var data: StringBlurTaskData
-        fun setParams(key: String, data: StringBlurTaskData, whileList: List<String>) {
+        private lateinit var encodePackages: List<String>
+        fun setParams(
+            key: String,
+            data: StringBlurTaskData,
+            whileList: List<String>,
+            encodePackages: List<String>
+        ) {
             this.key = key
             this.data = data
+            this.encodePackages = encodePackages
             WhileLists.add("${data.applicationId}.${data.pkg}.${data.alias}")
             WhileLists.add(whileList)
         }
@@ -32,10 +39,20 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
     ): ClassVisitor {
-        return if (WhileLists.contains(classContext.currentClassData.className)) {
+        val className = classContext.currentClassData.className
+        return if (WhileLists.contains(className) || !isInEncodePackages(className)) {
             object : ClassVisitor(Opcodes.ASM9, nextClassVisitor) {}
         } else {
             StringBlurClassVisitor(nextClassVisitor, key, data)
         }
+    }
+
+    private fun isInEncodePackages(className: String): Boolean {
+        for (encodePackage in encodePackages) {
+            if (className.startsWith(encodePackage)) {
+                return true
+            }
+        }
+        return false
     }
 }

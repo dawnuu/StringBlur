@@ -14,7 +14,6 @@ import groovy.xml.XmlParser
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.BasePluginExtension
 import java.nio.charset.Charset
 
 private const val PLUGIN_NAME = "stringblur"
@@ -22,7 +21,6 @@ private const val PLUGIN_NAME = "stringblur"
 class StringBlurPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.extensions.create(PLUGIN_NAME, StringBlurExtension::class.java)
-        val extent = target.extensions.findByType(BasePluginExtension::class.java)
         val extension = target.extensions.findByType(BaseExtension::class.java)
             ?: throw GradleException(String.format(Logger.text("请添加插件")))
         val components = target.extensions.getByType(AndroidComponentsExtension::class.java)
@@ -37,7 +35,6 @@ class StringBlurPlugin : Plugin<Project> {
             }
             //获取applicationId
             val applicationId = getApplicationId(target, extension)
-            Logger.log(applicationId)
             if (applicationId.isBlank()) {
                 throw GradleException(Logger.text("无法获取applicationId"))
             }
@@ -47,7 +44,13 @@ class StringBlurPlugin : Plugin<Project> {
                 alias = stringblur.alias
             )
             val whileList = stringblur.whiteList
-            StringBlurClassTransform.setParams(stringblur.key, stringBlurTaskData, whileList)
+            val encodePackages = stringblur.encodePackages
+            StringBlurClassTransform.setParams(
+                stringblur.key,
+                stringBlurTaskData,
+                whileList,
+                encodePackages
+            )
             it.instrumentation.transformClassesWith(
                 StringBlurClassTransform::class.java,
                 InstrumentationScope.ALL
