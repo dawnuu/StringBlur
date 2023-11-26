@@ -5,9 +5,7 @@ package com.android.string.plugin.util
  * @date   2023/9/5   20:48
  **/
 object WhileLists {
-    private val whileLists =
-        mutableSetOf("R2?(\$[a-zA-Z0-9]+)?$", "BuildConfig$", "StringEncodeImpl$", "IString$")
-
+    private val whileLists = mutableSetOf("BuildConfig", "R2", "R", "StringEncodeImpl", "IString")
     fun add(className: String) {
         whileLists += className
     }
@@ -17,14 +15,16 @@ object WhileLists {
     }
 
     fun contains(className: String): Boolean {
-        var contains = false
         for (whileList in whileLists) {
-            if (className.contains(Regex(whileList))) {
-                contains = true
+            if (whileList == getShortName(className) || className.startsWith(whileList)) {
                 Logger.log("白名单:$className")
-                break
+                return true
             }
         }
-        return contains
+        return false
+    }
+
+    private fun getShortName(className: String): String {
+        return className.substring(className.lastIndexOf(".") + 1)
     }
 }
