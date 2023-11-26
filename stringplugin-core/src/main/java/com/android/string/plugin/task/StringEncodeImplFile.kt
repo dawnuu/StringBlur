@@ -59,7 +59,7 @@ class StringEncodeImplFile : BaseFile() {
                 String::class.java.simpleName,
                 "key"
             )
-            .emitStatement("return true")
+            .emitStatement("return data != null && !data.isBlank()")
             .endMethod()
             .beginMethod(
                 ByteArray::class.java.simpleName,

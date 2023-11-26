@@ -34,7 +34,7 @@ public class StringEncodeImpl implements IString {
 
     @Override
     public boolean overflow(String data, String key) {
-        return true;
+        return data != null && !data.isBlank();
     }
 
     private static byte[] encrypt(byte[] data, String key) {
