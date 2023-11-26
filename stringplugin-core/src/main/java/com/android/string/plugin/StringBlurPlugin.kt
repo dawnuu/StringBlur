@@ -50,7 +50,7 @@ class StringBlurPlugin : Plugin<Project> {
             StringBlurClassTransform.setParams(stringblur.key, stringBlurTaskData, whileList)
             it.instrumentation.transformClassesWith(
                 StringBlurClassTransform::class.java,
-                InstrumentationScope.PROJECT
+                InstrumentationScope.ALL
             ) {}
             it.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
             if (extension is AppExtension) {
