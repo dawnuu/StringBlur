@@ -9,7 +9,7 @@ dependencies {
     implementation localGroovy()
     implementation "org.ow2.asm:asm:9.5"
     implementation "com.squareup:javawriter:2.5.1"
-    implementation "com.android.tools.build:gradle:7.4.0"
+    implementation "com.android.tools.build:gradle:7.3.0"
 
 }
 
