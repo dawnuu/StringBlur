@@ -4,7 +4,7 @@
 buildscript {
     dependencies {
         ...
-        classpath "com.android.string.plugin:stringblur:1.0.1"
+        classpath "com.android.string.plugin:stringblur:1.0.2"
     }
 }
 ```
@@ -25,6 +25,10 @@ stringblur {
 ```
 
 ## 更新日志
+
+### v1.0.2
+- 加密优化：解决部分字段无法加密问题
+- 修复encodePackages不配置时无法加密的问题
 
 ### v1.0.1
 - 优化白名单功能
