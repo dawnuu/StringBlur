@@ -7,7 +7,6 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.string.plugin.task.StringBlurTaskData
 import com.android.string.plugin.util.WhileLists
 import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.Opcodes
 
 /**
  * @author chancey
@@ -33,21 +32,20 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
         }
     }
 
-    override fun isInstrumentable(classData: ClassData) = true
+    override fun isInstrumentable(classData: ClassData): Boolean {
+        val className = classData.className
+        return !WhileLists.contains(className) && isInEncodePackages(className)
+    }
 
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): ClassVisitor {
-        val className = classContext.currentClassData.className
-        return if (WhileLists.contains(className) || !isInEncodePackages(className)) {
-            object : ClassVisitor(Opcodes.ASM9, nextClassVisitor) {}
-        } else {
-            StringBlurClassVisitor(nextClassVisitor, key, data)
-        }
-    }
+    ) = StringBlurClassVisitor(nextClassVisitor, key, data)
 
     private fun isInEncodePackages(className: String): Boolean {
+        if (encodePackages.isEmpty()) {
+            return true
+        }
         for (encodePackage in encodePackages) {
             if (className.startsWith(encodePackage)) {
                 return true

@@ -63,6 +63,6 @@ class StringBlurClassVisitor(
     ): MethodVisitor {
         val mv = super.visitMethod(access, name, descriptor, signature, exceptions)
             ?: return super.visitMethod(access, name, descriptor, signature, exceptions)
-        return controller.visitMethod(mv, name)
+        return controller.visitMethod(access, mv, name)
     }
 }
