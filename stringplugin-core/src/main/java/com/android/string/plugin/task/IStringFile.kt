@@ -1,5 +1,6 @@
 package com.android.string.plugin.task
 
+import com.android.string.plugin.data.Constant
 import com.squareup.javawriter.JavaWriter
 
 /**
@@ -8,12 +9,10 @@ import com.squareup.javawriter.JavaWriter
  * @author chancey
  * @date   2023/9/5   20:14
  **/
-private const val CLASS_NAME = "IString"
-
 class IStringFile : BaseFile() {
-    override fun write(writer: JavaWriter, data: StringBlurTaskData) {
-        writer.emitPackage("${data.applicationId}.${data.pkg}")
-            .beginType(CLASS_NAME, "interface")
+    override fun write(writer: JavaWriter, applicationId: String) {
+        writer.emitPackage(Constant.PLUGIN_PACKAGE.format(applicationId))
+            .beginType(Constant.PLUGIN_INTERFACE_CLASS_NAME, "interface")
             .beginMethod(
                 String::class.java.simpleName,
                 "encrypt",
@@ -47,6 +46,6 @@ class IStringFile : BaseFile() {
             .endType()
     }
 
-    override fun getFileName(data: StringBlurTaskData) = "$CLASS_NAME.java"
+    override fun getFileName(applicationId: String) = "${Constant.PLUGIN_INTERFACE_CLASS_NAME}.java"
 
 }

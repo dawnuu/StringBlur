@@ -1,6 +1,7 @@
 package com.android.string.plugin.task
 
 import android.util.Base64
+import com.android.string.plugin.data.Constant
 import com.squareup.javawriter.JavaWriter
 import java.io.UnsupportedEncodingException
 import javax.lang.model.element.Modifier
@@ -10,15 +11,17 @@ import javax.lang.model.element.Modifier
  * @date   2023/9/5   18:35
  **/
 class StringEncodeImplFile : BaseFile() {
-    companion object {
-        const val CLASS_NAME = "StringEncodeImpl"
-    }
-
-    override fun write(writer: JavaWriter, data: StringBlurTaskData) {
-        writer.emitPackage("${data.applicationId}.${data.pkg}")
+    override fun write(writer: JavaWriter, applicationId: String) {
+        writer.emitPackage(Constant.PLUGIN_PACKAGE.format(applicationId))
             .emitImports(UnsupportedEncodingException::class.java)
             .emitImports(Base64::class.java)
-            .beginType(CLASS_NAME, "class", mutableSetOf(Modifier.FINAL), null, "IString")
+            .beginType(
+                Constant.PLUGIN_IMPL_CLASS_NAME,
+                "class",
+                mutableSetOf(Modifier.FINAL),
+                null,
+                Constant.PLUGIN_INTERFACE_CLASS_NAME
+            )
             .emitField(
                 String::class.java.simpleName,
                 "CHARSET_NAME_UTF_8",
@@ -102,5 +105,5 @@ class StringEncodeImplFile : BaseFile() {
         return "String newData;try {newData = new String(decrypt(Base64.decode(data, Base64.NO_WRAP), key), CHARSET_NAME_UTF_8);} catch (UnsupportedEncodingException e) {newData = new String(decrypt(Base64.decode(data, Base64.NO_WRAP), key));}return newData"
     }
 
-    override fun getFileName(data: StringBlurTaskData) = "${CLASS_NAME}.java"
+    override fun getFileName(applicationId: String) = "${Constant.PLUGIN_IMPL_CLASS_NAME}.java"
 }

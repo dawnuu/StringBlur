@@ -1,9 +1,9 @@
 package com.android.string.plugin.trasform
 
+import com.android.string.plugin.data.Constant
 import com.android.string.plugin.field.StringFiled
 import com.android.string.plugin.stringblur.MD5
 import com.android.string.plugin.stringblur.StringEncodeImpl
-import com.android.string.plugin.task.StringBlurTaskData
 import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
 import com.android.string.plugin.trasform.visitor.InitMethodVisitor
 import com.android.string.plugin.trasform.visitor.NormalMethodVisitor
@@ -14,9 +14,9 @@ import org.objectweb.asm.Opcodes
  * @author chancey
  * @date   2023/9/6   22:54
  **/
-class ClassVisitorController(data: StringBlurTaskData, private val key: String) {
+class ClassVisitorController(applicationId: String, private val key: String) {
     private val stringBlurClassName =
-        "${data.applicationId}.${data.pkg}.${data.alias}".replace(".", "/")
+        Constant.PLUGIN_CLASS_PACKAGE.format(applicationId).replace(".", "/")
     var currentClassName: String? = null
     private val stringEncodeImpl = StringEncodeImpl()
     val staticFinalFields = mutableListOf<StringFiled>()

@@ -4,7 +4,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
-import com.android.string.plugin.task.StringBlurTaskData
+import com.android.string.plugin.data.Constant
 import com.android.string.plugin.util.WhileLists
 import org.objectweb.asm.ClassVisitor
 
@@ -16,18 +16,18 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
 
     companion object {
         private lateinit var key: String
-        private lateinit var data: StringBlurTaskData
+        private lateinit var applicationId: String
         private lateinit var encodePackages: List<String>
         fun setParams(
             key: String,
-            data: StringBlurTaskData,
+            applicationId: String,
             whileList: List<String>,
             encodePackages: List<String>
         ) {
             this.key = key
-            this.data = data
+            this.applicationId = applicationId
             this.encodePackages = encodePackages
-            WhileLists.add("${data.applicationId}.${data.pkg}.${data.alias}")
+            WhileLists.add(Constant.PLUGIN_CLASS_PACKAGE.format(applicationId))
             WhileLists.add(whileList)
         }
     }
@@ -40,7 +40,7 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ) = StringBlurClassVisitor(nextClassVisitor, key, data)
+    ) = StringBlurClassVisitor(nextClassVisitor, key, applicationId)
 
     private fun isInEncodePackages(className: String): Boolean {
         if (encodePackages.isEmpty()) {

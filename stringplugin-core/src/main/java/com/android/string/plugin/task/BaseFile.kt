@@ -10,14 +10,14 @@ import java.io.FileWriter
  **/
 abstract class BaseFile {
 
-    fun create(path: File, data: StringBlurTaskData) {
-        val file = File(path, getFileName(data))
+    fun create(path: File, applicationId: String) {
+        val file = File(path, getFileName(applicationId))
         JavaWriter(FileWriter(file)).use {
-            write(it, data)
+            write(it, applicationId)
         }
     }
 
-    abstract fun write(writer: JavaWriter, data: StringBlurTaskData)
+    abstract fun write(writer: JavaWriter, applicationId: String)
 
-    abstract fun getFileName(data: StringBlurTaskData): String
+    abstract fun getFileName(applicationId: String): String
 }

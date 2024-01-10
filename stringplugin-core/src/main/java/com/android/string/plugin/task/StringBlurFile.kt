@@ -1,8 +1,7 @@
 package com.android.string.plugin.task
 
+import com.android.string.plugin.data.Constant
 import com.squareup.javawriter.JavaWriter
-import java.io.File
-import java.io.FileWriter
 import javax.lang.model.element.Modifier
 
 /**
@@ -10,27 +9,25 @@ import javax.lang.model.element.Modifier
  * @author chancey
  * @date   2023/9/5   17:24
  **/
-class StringBlurFile {
+class StringBlurFile : BaseFile() {
 
-    fun create(path: File, stringBlurTaskData: StringBlurTaskData) {
-        val outputFile = File(path, "${stringBlurTaskData.alias}.java")
-        JavaWriter(FileWriter(outputFile)).use {
-            it.emitPackage("${stringBlurTaskData.applicationId}.${stringBlurTaskData.pkg}")
-            it.emitEmptyLine()
-            it.emitImports("${stringBlurTaskData.applicationId}.${stringBlurTaskData.pkg}.${StringEncodeImplFile.CLASS_NAME}")
-            it.emitEmptyLine()
-            it.beginType(
-                stringBlurTaskData.alias,
+    override fun write(writer: JavaWriter, applicationId: String) {
+        writer.emitPackage(Constant.PLUGIN_PACKAGE.format(applicationId))
+            .emitEmptyLine()
+            .emitImports(Constant.PLUGIN_IMPL_CLASS_PACKAGE.format(applicationId))
+            .emitEmptyLine()
+            .beginType(
+                Constant.PLUGIN_CLASS_NAME,
                 "class",
                 mutableSetOf(Modifier.PUBLIC, Modifier.FINAL),
             )
-            it.emitField(
-                StringEncodeImplFile.CLASS_NAME,
+            .emitField(
+                Constant.PLUGIN_IMPL_CLASS_NAME,
                 "IMPL",
                 mutableSetOf(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL),
-                "new ${StringEncodeImplFile.CLASS_NAME}()"
+                "new ${Constant.PLUGIN_IMPL_CLASS_NAME}()"
             )
-            it.beginMethod(
+            .beginMethod(
                 String::class.java.simpleName,
                 "decrypt",
                 mutableSetOf(Modifier.PUBLIC, Modifier.STATIC),
@@ -39,10 +36,11 @@ class StringBlurFile {
                 String::class.java.simpleName,
                 "key"
             )
-            it.emitStatement("return IMPL.decrypt(value,key)")
-            it.endMethod()
-            it.emitEmptyLine()
-            it.endType()
-        }
+            .emitStatement("return IMPL.decrypt(value,key)")
+            .endMethod()
+            .emitEmptyLine()
+            .endType()
     }
+
+    override fun getFileName(applicationId: String) = "${Constant.PLUGIN_CLASS_NAME}.java"
 }

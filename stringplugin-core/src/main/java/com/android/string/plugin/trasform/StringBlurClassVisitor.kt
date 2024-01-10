@@ -1,6 +1,5 @@
 package com.android.string.plugin.trasform
 
-import com.android.string.plugin.task.StringBlurTaskData
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
@@ -13,9 +12,9 @@ import org.objectweb.asm.Opcodes
 class StringBlurClassVisitor(
     cv: ClassVisitor,
     key: String,
-    data: StringBlurTaskData
+    applicationId: String
 ) : ClassVisitor(Opcodes.ASM9, cv) {
-    private val controller = ClassVisitorController(data, key)
+    private val controller = ClassVisitorController(applicationId, key)
     override fun visit(
         version: Int,
         access: Int,

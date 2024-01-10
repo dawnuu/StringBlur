@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'stringblur'
+//    id 'stringblur'
 }
 
 Properties props = new Properties()
@@ -52,10 +52,10 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
 }
 
-stringblur {
-    key "gc2RibGA6EQObn0w"
-    enable true
-    whiteList = []
-    pkg "encode.test.fafaf"
-    alias "ZiFuChuanEncode"
-}
+//stringblur {
+//    key "gc2RibGA6EQObn0w"
+//    enable true
+//    whiteList = []
+//    pkg "encode.test.fafaf"
+//    alias "ZiFuChuanEncode"
+//}
