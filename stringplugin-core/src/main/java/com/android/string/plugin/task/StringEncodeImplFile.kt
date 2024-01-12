@@ -3,104 +3,50 @@ package com.android.string.plugin.task
 import android.util.Base64
 import com.android.string.plugin.data.Constant
 import com.squareup.javawriter.JavaWriter
-import java.io.UnsupportedEncodingException
 import javax.lang.model.element.Modifier
 
 /**
+ * 生成java代码
+ * IString接口实现类，内容见com.android.string.plugin.files.StringEncodeImpl
+ * 这里只生成解密方法
  * @author chancey
  * @date   2023/9/5   18:35
  **/
 class StringEncodeImplFile : BaseFile() {
     override fun write(writer: JavaWriter, applicationId: String) {
         writer.emitPackage(Constant.PLUGIN_PACKAGE.format(applicationId))
-            .emitImports(UnsupportedEncodingException::class.java)
             .emitImports(Base64::class.java)
             .beginType(
                 Constant.PLUGIN_IMPL_CLASS_NAME,
                 "class",
                 mutableSetOf(Modifier.FINAL),
-                null,
                 Constant.PLUGIN_INTERFACE_CLASS_NAME
             )
-            .emitField(
-                String::class.java.simpleName,
-                "CHARSET_NAME_UTF_8",
-                mutableSetOf(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL),
-                "\"utf-8\""
-            )
             .emitAnnotation(Override::class.java)
             .beginMethod(
                 String::class.java.simpleName,
-                "encrypt",
+                "decryptBytes",
+                mutableSetOf(Modifier.PUBLIC),
+                ByteArray::class.java.simpleName,
+                "data",
+                ByteArray::class.java.simpleName,
+                "key"
+            )
+            .emitStatement("return new String(decrypt(Base64.decode(data, Base64.NO_WRAP), key))")
+            .endMethod()
+            .emitAnnotation(Override::class.java)
+            .beginMethod(
+                String::class.java.simpleName,
+                "decryptString",
                 mutableSetOf(Modifier.PUBLIC),
                 String::class.java.simpleName,
                 "data",
                 String::class.java.simpleName,
                 "key"
             )
-            .emitStatement(getEncrypt())
-            .endMethod()
-            .emitAnnotation(Override::class.java)
-            .beginMethod(
-                String::class.java.simpleName,
-                "decrypt",
-                mutableSetOf(Modifier.PUBLIC),
-                String::class.java.simpleName,
-                "data",
-                String::class.java.simpleName,
-                "key"
-            )
-            .emitStatement(getDecrypt())
-            .endMethod()
-            .emitAnnotation(Override::class.java)
-            .beginMethod(
-                Boolean::class.java.simpleName,
-                "overflow",
-                mutableSetOf(Modifier.PUBLIC),
-                String::class.java.simpleName,
-                "data"
-            )
-            .emitStatement("return data != null && !data.isBlank()")
-            .endMethod()
-            .beginMethod(
-                ByteArray::class.java.simpleName,
-                "encrypt",
-                mutableSetOf(Modifier.PRIVATE, Modifier.STATIC),
-                ByteArray::class.java.simpleName,
-                "data",
-                String::class.java.simpleName,
-                "key"
-            )
-            .emitStatement(getStaticEncrypt())
-            .endMethod()
-            .beginMethod(
-                ByteArray::class.java.simpleName,
-                "decrypt",
-                mutableSetOf(Modifier.PRIVATE, Modifier.STATIC),
-                ByteArray::class.java.simpleName,
-                "data",
-                String::class.java.simpleName,
-                "key"
-            )
-            .emitStatement(getStaticDecrypt())
+            .emitStatement("return decryptBytes(Base64.decode(data, Base64.NO_WRAP), key.getBytes())")
             .endMethod()
             .endType()
-    }
-
-    private fun getStaticEncrypt(): String {
-        return "int lenKey = key.length();int j = 0;for (int i = 0; i < data.length; i++) {if (j >= lenKey) {j = 0;}data[i] = (byte) (data[i] + key.charAt(j));j++;}return data"
-    }
-
-    private fun getStaticDecrypt(): String {
-        return "int lenKey = key.length();int j = 0;for (int i = 0; i < data.length; i++) {if (j >= lenKey) {j = 0;}data[i] = (byte) (data[i] - key.charAt(j));j++;}return data"
-    }
-
-    private fun getEncrypt(): String {
-        return "String newData;try {newData = new String(Base64.encode(encrypt(data.getBytes(CHARSET_NAME_UTF_8), key), Base64.NO_WRAP));} catch (UnsupportedEncodingException e) {newData = new String(Base64.encode(encrypt(data.getBytes(), key), Base64.NO_WRAP));}return newData"
-    }
-
-    private fun getDecrypt(): String {
-        return "String newData;try {newData = new String(decrypt(Base64.decode(data, Base64.NO_WRAP), key), CHARSET_NAME_UTF_8);} catch (UnsupportedEncodingException e) {newData = new String(decrypt(Base64.decode(data, Base64.NO_WRAP), key));}return newData"
     }
 
     override fun getFileName(applicationId: String) = "${Constant.PLUGIN_IMPL_CLASS_NAME}.java"

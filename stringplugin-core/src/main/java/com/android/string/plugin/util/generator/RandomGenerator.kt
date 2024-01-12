@@ -12,6 +12,6 @@ class RandomGenerator(size: Int) : Generator {
     private val bytes = ByteArray(size)
     override fun generate(): String {
         secureRandom.nextBytes(bytes)
-        return Base64.encodeToString(bytes, Base64.NO_WRAP)
+        return String(Base64.encode(bytes, Base64.NO_WRAP))
     }
 }

@@ -2,10 +2,11 @@ package com.android.string.plugin.trasform
 
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.field.StringFiled
-import com.android.string.plugin.stringblur.StringEncodeImpl
+import com.android.string.plugin.files.StringEncodeImpl
 import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
 import com.android.string.plugin.trasform.visitor.InitMethodVisitor
 import com.android.string.plugin.trasform.visitor.NormalMethodVisitor
+import com.android.string.plugin.util.AsmWriter
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
@@ -79,19 +80,23 @@ class ClassVisitorController(
     }
 
 
-    fun overflow(data: String?) = stringEncodeImpl.overflow(data)
+    fun overflow(data: String?) = stringEncodeImpl.overflow(data?.toByteArray())
 
     fun write(data: String?, mv: MethodVisitor) {
-        val encodeText = stringEncodeImpl.encrypt(data, key)
-        mv.visitLdcInsn(encodeText)
-        mv.visitLdcInsn(key)
-        mv.visitMethodInsn(
-            Opcodes.INVOKESTATIC,
-            stringBlurClassName,
-            "decrypt",
-            "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
-            false
-        )
+        if (useBytes) {
+            writeByBytes(data, mv)
+        } else {
+            writeByString(data, mv)
+        }
     }
 
+    private fun writeByString(data: String?, mv: MethodVisitor) {
+        val encodeText = stringEncodeImpl.encryptString(data, key)
+        AsmWriter(stringBlurClassName).write(encodeText, key, mv)
+    }
+
+    private fun writeByBytes(data: String?, mv: MethodVisitor) {
+        val encodeText = stringEncodeImpl.encryptBytes(data, key)
+        AsmWriter(stringBlurClassName).write(encodeText, key, mv)
+    }
 }

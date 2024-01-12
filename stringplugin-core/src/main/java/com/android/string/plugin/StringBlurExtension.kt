@@ -6,6 +6,7 @@ package com.android.string.plugin
  **/
 abstract class StringBlurExtension {
     var key: Any? = null
+    var useBytes: Boolean = false
     var enable: Boolean = false
     var whiteList: List<String> = emptyList()
     var encodePackages: List<String> = emptyList()

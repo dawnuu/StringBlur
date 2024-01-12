@@ -13,9 +13,7 @@ class StringBlurFile : BaseFile() {
 
     override fun write(writer: JavaWriter, applicationId: String) {
         writer.emitPackage(Constant.PLUGIN_PACKAGE.format(applicationId))
-            .emitEmptyLine()
             .emitImports(Constant.PLUGIN_IMPL_CLASS_PACKAGE.format(applicationId))
-            .emitEmptyLine()
             .beginType(
                 Constant.PLUGIN_CLASS_NAME,
                 "class",
@@ -36,9 +34,19 @@ class StringBlurFile : BaseFile() {
                 String::class.java.simpleName,
                 "key"
             )
-            .emitStatement("return IMPL.decrypt(value,key)")
+            .emitStatement("return IMPL.decryptString(value,key)")
             .endMethod()
-            .emitEmptyLine()
+            .beginMethod(
+                String::class.java.simpleName,
+                "decrypt",
+                mutableSetOf(Modifier.PUBLIC, Modifier.STATIC),
+                ByteArray::class.java.simpleName,
+                "value",
+                ByteArray::class.java.simpleName,
+                "key"
+            )
+            .emitStatement("return IMPL.decryptBytes(value,key)")
+            .endMethod()
             .endType()
     }
 

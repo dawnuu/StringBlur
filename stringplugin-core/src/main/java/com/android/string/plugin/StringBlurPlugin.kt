@@ -44,7 +44,7 @@ class StringBlurPlugin : Plugin<Project> {
             val encodePackages = stringblur.encodePackages
             StringBlurClassTransform.setParams(
                 generator.generate(),
-                useBytes = false,
+                useBytes = stringblur.useBytes,
                 applicationId,
                 whileList,
                 encodePackages
