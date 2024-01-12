@@ -12,9 +12,10 @@ import org.objectweb.asm.Opcodes
 class StringBlurClassVisitor(
     cv: ClassVisitor,
     key: String,
+    useBytes: Boolean,
     applicationId: String
 ) : ClassVisitor(Opcodes.ASM9, cv) {
-    private val controller = ClassVisitorController(applicationId, key)
+    private val controller = ClassVisitorController(applicationId, key, useBytes)
     override fun visit(
         version: Int,
         access: Int,

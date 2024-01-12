@@ -58,9 +58,7 @@ class StringEncodeImplFile : BaseFile() {
                 "overflow",
                 mutableSetOf(Modifier.PUBLIC),
                 String::class.java.simpleName,
-                "data",
-                String::class.java.simpleName,
-                "key"
+                "data"
             )
             .emitStatement("return data != null && !data.isBlank()")
             .endMethod()

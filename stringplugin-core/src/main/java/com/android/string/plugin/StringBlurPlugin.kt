@@ -10,6 +10,8 @@ import com.android.string.plugin.data.Constant
 import com.android.string.plugin.task.StringBlurTask
 import com.android.string.plugin.trasform.StringBlurClassTransform
 import com.android.string.plugin.util.Logger
+import com.android.string.plugin.util.generator.KeyGenerator
+import com.android.string.plugin.util.generator.RandomGenerator
 import groovy.xml.XmlParser
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -28,9 +30,11 @@ class StringBlurPlugin : Plugin<Project> {
                 Logger.log("功能关闭")
                 return@onVariants
             }
-            if (stringblur.key.isBlank()) {
-                throw GradleException(Logger.text("加密key不能为空"))
-            }
+            val generator = when (stringblur.key) {
+                is String -> KeyGenerator(stringblur.key as String)
+                is Int -> RandomGenerator(stringblur.key as Int)
+                else -> null
+            } ?: throw GradleException(Logger.text("加密key不能为空"))
             //获取applicationId
             val applicationId = getApplicationId(target, extension)
             if (applicationId.isBlank()) {
@@ -39,7 +43,8 @@ class StringBlurPlugin : Plugin<Project> {
             val whileList = stringblur.whiteList
             val encodePackages = stringblur.encodePackages
             StringBlurClassTransform.setParams(
-                stringblur.key,
+                generator.generate(),
+                useBytes = false,
                 applicationId,
                 whileList,
                 encodePackages

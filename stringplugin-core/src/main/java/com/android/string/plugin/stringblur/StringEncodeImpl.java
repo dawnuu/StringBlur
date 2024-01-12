@@ -33,7 +33,7 @@ public class StringEncodeImpl implements IString {
     }
 
     @Override
-    public boolean overflow(String data, String key) {
+    public boolean overflow(String data) {
         return data != null && !data.isBlank();
     }
 

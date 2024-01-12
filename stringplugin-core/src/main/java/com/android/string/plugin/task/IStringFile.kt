@@ -38,9 +38,7 @@ class IStringFile : BaseFile() {
                 "overflow",
                 mutableSetOf(),
                 String::class.java.simpleName,
-                "data",
-                String::class.java.simpleName,
-                "key"
+                "data"
             )
             .endMethod()
             .endType()

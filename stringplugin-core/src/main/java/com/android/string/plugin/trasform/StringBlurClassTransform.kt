@@ -16,15 +16,18 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
 
     companion object {
         private lateinit var key: String
+        private var useBytes = false
         private lateinit var applicationId: String
         private lateinit var encodePackages: List<String>
         fun setParams(
             key: String,
+            useBytes: Boolean,
             applicationId: String,
             whileList: List<String>,
             encodePackages: List<String>
         ) {
             this.key = key
+            this.useBytes = useBytes
             this.applicationId = applicationId
             this.encodePackages = encodePackages
             WhileLists.add(Constant.PLUGIN_CLASS_PACKAGE.format(applicationId))
@@ -40,7 +43,7 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ) = StringBlurClassVisitor(nextClassVisitor, key, applicationId)
+    ) = StringBlurClassVisitor(nextClassVisitor, key, useBytes, applicationId)
 
     private fun isInEncodePackages(className: String): Boolean {
         if (encodePackages.isEmpty()) {

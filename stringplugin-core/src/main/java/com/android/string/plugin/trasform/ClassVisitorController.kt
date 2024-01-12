@@ -2,7 +2,6 @@ package com.android.string.plugin.trasform
 
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.field.StringFiled
-import com.android.string.plugin.stringblur.MD5
 import com.android.string.plugin.stringblur.StringEncodeImpl
 import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
 import com.android.string.plugin.trasform.visitor.InitMethodVisitor
@@ -14,7 +13,11 @@ import org.objectweb.asm.Opcodes
  * @author chancey
  * @date   2023/9/6   22:54
  **/
-class ClassVisitorController(applicationId: String, private val key: String) {
+class ClassVisitorController(
+    applicationId: String,
+    private val key: String,
+    private val useBytes: Boolean
+) {
     private val stringBlurClassName =
         Constant.PLUGIN_CLASS_PACKAGE.format(applicationId).replace(".", "/")
     var currentClassName: String? = null
@@ -76,13 +79,12 @@ class ClassVisitorController(applicationId: String, private val key: String) {
     }
 
 
-    fun overflow(data: String?) = stringEncodeImpl.overflow(data, key)
+    fun overflow(data: String?) = stringEncodeImpl.overflow(data)
 
     fun write(data: String?, mv: MethodVisitor) {
-        val encodeKey = MD5.getMessageDigest(key.toByteArray())
-        val encodeText = stringEncodeImpl.encrypt(data, encodeKey)
+        val encodeText = stringEncodeImpl.encrypt(data, key)
         mv.visitLdcInsn(encodeText)
-        mv.visitLdcInsn(encodeKey)
+        mv.visitLdcInsn(key)
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC,
             stringBlurClassName,
