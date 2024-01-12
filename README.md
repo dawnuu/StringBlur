@@ -19,10 +19,10 @@ stringblur {
     enable true //混淆开关，默认关闭
     whiteList = ['com.xxx.xxx'] //白名单，默认加密全部，例：不加密MainActivity类['com.xxx.xxx.MainActivity']，不加密某个包['com.xxx.xxx']
     encodePackages = ['com.xxx.xxx'] //自定义加密目录，默认加密全部
-    # 1.1.0版本移除以下字段
+    // 1.1.0版本移除以下字段
     pkg 'stringblur' //加密相关类所在路径，默认在包名下的stringblur目录中，可以移动到其他目录，如encode.test，则移动到包名下的encode/test中 
     alias 'StringBlur' //加密类别名，默认加密类为StringBlur.java
-    # 1.1.0版本新增字段
+    // 1.1.0版本新增字段
     useBytes false //是否使用字节码形式加密，默认关闭，开启后加密内容将显示new byte[]形式
 }
 ```
