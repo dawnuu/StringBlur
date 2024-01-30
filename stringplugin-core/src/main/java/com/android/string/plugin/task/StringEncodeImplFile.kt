@@ -44,7 +44,7 @@ class StringEncodeImplFile : BaseFile() {
                 String::class.java.simpleName,
                 "key"
             )
-            .emitStatement("return decryptBytes(Base64.decode(data, Base64.NO_WRAP), key.getBytes())")
+            .emitStatement("return decryptBytes(data.getBytes(), key.getBytes())")
             .endMethod()
             .endType()
     }

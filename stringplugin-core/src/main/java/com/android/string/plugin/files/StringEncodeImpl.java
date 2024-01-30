@@ -24,6 +24,6 @@ public class StringEncodeImpl extends IString {
 
     @Override
     public String decryptString(String data, String key) {
-        return decryptBytes(Base64.decode(data, Base64.NO_WRAP), key.getBytes());
+        return decryptBytes(data.getBytes(), key.getBytes());
     }
 }
