@@ -1,5 +1,4 @@
 plugins {
-    id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
     id 'maven-publish'
 }
@@ -7,14 +6,14 @@ plugins {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation "org.ow2.asm:asm:9.5"
+    implementation "org.ow2.asm:asm:9.7.1"
     implementation "com.squareup:javawriter:2.5.1"
     implementation "com.android.tools.build:gradle:7.3.0"
 
 }
 
 javaToolchains {
-    version JavaVersion.VERSION_1_8
+    version JavaVersion.VERSION_17
 }
 
 publishing {
@@ -26,19 +25,12 @@ publishing {
             version "1.1.1"
         }
     }
-    //local
-//    repositories {
-//        maven {
-//            url '../repo'
-//        }
-//    }
-    //remote
     repositories {
         maven {
-            url "http://47.106.160.86:8081/repository/wellresion-maven/"
+            url System.getenv("MAVEN_URL")
             credentials {
-                username 'cleantools'
-                password 's4jd59&a'
+                username System.getenv("MAVEN_UPLOAD_USER")
+                password System.getenv("MAVEN_UPLOAD_PASS")
             }
             allowInsecureProtocol true
         }
