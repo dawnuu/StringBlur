@@ -18,18 +18,23 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
         private lateinit var key: String
         private var useBytes = false
         private lateinit var applicationId: String
-        private lateinit var encodePackages: List<String>
+        private val encodePackages = mutableListOf<String>()
         fun setParams(
             key: String,
             useBytes: Boolean,
             applicationId: String,
             whileList: List<String>,
-            encodePackages: List<String>
+            encodePackages: List<String>?
         ) {
             this.key = key
             this.useBytes = useBytes
             this.applicationId = applicationId
-            this.encodePackages = encodePackages
+            //将自身添加进加密列表
+            this.encodePackages.add(applicationId)
+            //追加自定义列表
+            encodePackages?.let {
+                this.encodePackages.addAll(it)
+            }
             WhileLists.add(Constant.PLUGIN_CLASS_PACKAGE.format(applicationId))
             WhileLists.add(whileList)
         }
