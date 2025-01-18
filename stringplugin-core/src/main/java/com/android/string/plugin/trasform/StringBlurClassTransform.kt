@@ -29,11 +29,12 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
             this.key = key
             this.useBytes = useBytes
             this.applicationId = applicationId
-            //将自身添加进加密列表
-            this.encodePackages.add(applicationId)
-            //追加自定义列表
-            encodePackages?.let {
-                this.encodePackages.addAll(it)
+            //为空则加密全部
+            if (encodePackages != null) {
+                //将自身添加进加密列表
+                this.encodePackages.add(applicationId)
+                //追加自定义列表
+                this.encodePackages.addAll(encodePackages)
             }
             WhileLists.add(Constant.PLUGIN_CLASS_PACKAGE.format(applicationId))
             WhileLists.add(whileList)
