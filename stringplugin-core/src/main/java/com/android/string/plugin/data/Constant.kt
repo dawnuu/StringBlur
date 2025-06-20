@@ -16,43 +16,27 @@ object Constant {
     const val PLUGIN_CLASS_NAME = "StringBlur"
 
     /**
-     * 工具接口类名
+     * 加解密类路径
      */
-    const val PLUGIN_INTERFACE_CLASS_NAME = "IString"
+    const val PLUGIN_CLASS_PACKAGE = "%s.$PLUGIN_NAME"
 
     /**
-     * 工具实现类类名
+     * 加解密类完整路径
      */
-    const val PLUGIN_IMPL_CLASS_NAME = "StringEncodeImpl"
+    const val PLUGIN_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$PLUGIN_CLASS_NAME"
 
     /**
-     * 工具类包名，包名.插件名.StringBlur
+     *  默认加解密实现类类名
      */
-    const val PLUGIN_CLASS_PACKAGE = "%s.$PLUGIN_NAME.$PLUGIN_CLASS_NAME"
+    const val DEFAULT_IMPL_CLASS_NAME = "StringEncodeImpl"
 
     /**
-     * 工具接口类包名，包名.插件名.IString
+     * 加解密抽象接口
      */
-    const val PLUGIN_INTERFACE_CLASS_PACKAGE = "%s.$PLUGIN_NAME.$PLUGIN_INTERFACE_CLASS_NAME"
+    const val ABSTRACT_CLASS_NAME = "com.android.string.plugin.IString"
 
     /**
-     * 工具实现类包名，包名.插件名.StringEncodeImpl
+     * 默认用于输出到应用层的加密类完整路径
      */
-    const val PLUGIN_IMPL_CLASS_PACKAGE = "%s.$PLUGIN_NAME.$PLUGIN_IMPL_CLASS_NAME"
-
-    /**
-     * 插件包名，其实就是存放插件的包路径
-     */
-    const val PLUGIN_PACKAGE = "%s.$PLUGIN_NAME"
-
-    /**
-     *工具类输出路径
-     *
-     */
-    const val OUTPUT_PATH = "generated/source/$PLUGIN_NAME/%s"
-
-    /**
-     * 构建任务名
-     */
-    const val BUILD_TASK_NAME = "generate$PLUGIN_CLASS_NAME%s"
+    const val DEFAULT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$DEFAULT_IMPL_CLASS_NAME"
 }

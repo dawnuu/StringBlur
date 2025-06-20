@@ -1,8 +1,8 @@
 package com.android.string.plugin.trasform
 
+import com.android.string.plugin.IString
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.field.StringFiled
-import com.android.string.plugin.files.StringEncodeImpl
 import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
 import com.android.string.plugin.trasform.visitor.InitMethodVisitor
 import com.android.string.plugin.trasform.visitor.NormalMethodVisitor
@@ -17,12 +17,12 @@ import org.objectweb.asm.Opcodes
 class ClassVisitorController(
     applicationId: String,
     private val key: String,
-    private val useBytes: Boolean
+    private val useBytes: Boolean,
+    private val stringBlurWrapper: IString
 ) {
     private val stringBlurClassName =
-        Constant.PLUGIN_CLASS_PACKAGE.format(applicationId).replace(".", "/")
+        Constant.PLUGIN_CLASS_FILE_PATH.format(applicationId).replace(".", "/")
     var currentClassName: String? = null
-    private val stringEncodeImpl = StringEncodeImpl()
     val staticFinalFields = mutableListOf<StringFiled>()
     val staticFields = mutableListOf<StringFiled>()
     val finalFields = mutableListOf<StringFiled>()
@@ -80,7 +80,7 @@ class ClassVisitorController(
     }
 
 
-    fun overflow(data: String?) = stringEncodeImpl.overflow(data?.toByteArray())
+    fun overflow(data: String?) = stringBlurWrapper.overflow(data?.toByteArray())
 
     fun write(data: String?, mv: MethodVisitor) {
         if (useBytes) {
@@ -91,12 +91,12 @@ class ClassVisitorController(
     }
 
     private fun writeByString(data: String?, mv: MethodVisitor) {
-        val encodeText = stringEncodeImpl.encryptString(data, key)
+        val encodeText = stringBlurWrapper.encryptString(data, key)
         AsmWriter(stringBlurClassName).write(encodeText, key, mv)
     }
 
     private fun writeByBytes(data: String?, mv: MethodVisitor) {
-        val encodeText = stringEncodeImpl.encryptBytes(data, key)
+        val encodeText = stringBlurWrapper.encryptBytes(data, key)
         AsmWriter(stringBlurClassName).write(encodeText, key, mv)
     }
 }

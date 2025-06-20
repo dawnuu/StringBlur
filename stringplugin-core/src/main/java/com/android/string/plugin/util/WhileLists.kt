@@ -1,11 +1,15 @@
 package com.android.string.plugin.util
 
+import com.android.string.plugin.data.Constant
+
 /**
  * @author chancey
  * @date   2023/9/5   20:48
  **/
 object WhileLists {
-    private val whileLists = mutableSetOf("BuildConfig", "R2", "R", "StringEncodeImpl", "IString")
+    private val whileLists =
+        mutableSetOf("BuildConfig", "R2", "R", "IString", Constant.DEFAULT_IMPL_CLASS_NAME)
+
     fun add(className: String) {
         whileLists += className
     }

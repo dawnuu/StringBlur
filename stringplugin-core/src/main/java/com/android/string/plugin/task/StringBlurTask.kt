@@ -2,6 +2,8 @@ package com.android.string.plugin.task
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.string.plugin.data.Constant
+import com.android.string.plugin.task.build.StringBlurFile
+import com.android.string.plugin.task.build.StringEncodeImplFile
 import com.android.string.plugin.util.Logger
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -21,16 +23,21 @@ import javax.inject.Inject
 abstract class StringBlurTask @Inject constructor() : DefaultTask() {
     @TaskAction
     fun injectSource() {
-        val path =
-            File(dir.get(), Constant.PLUGIN_PACKAGE.format(applicationId.get()).replace(".", "/"))
+        val child = Constant.PLUGIN_CLASS_PACKAGE.format(applicationId.get()).replace(".", "/")
+        val path = File(dir.get(), child)
         Logger.log("路径$path")
         if (!path.exists()) {
             path.mkdirs()
         }
-        IStringFile().create(path, applicationId.get())
-        StringEncodeImplFile().create(path, applicationId.get())
-        StringBlurFile().create(path, applicationId.get())
+        val customEncodeClass = customEncodeClass.get()
+        if (customEncodeClass.isNullOrBlank()) {
+            StringEncodeImplFile().create(path, applicationId.get(), "")
+        }
+        StringBlurFile().create(path, applicationId.get(), customEncodeClass)
     }
+
+    @get:Input
+    abstract val customEncodeClass: Property<String>
 
     @get:Input
     abstract val applicationId: Property<String>
@@ -39,17 +46,25 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
     abstract val dir: Property<File>
 
     companion object {
-        fun execute(project: Project, variant: BaseVariant, applicationId: String) {
+        fun execute(
+            project: Project,
+            variant: BaseVariant,
+            applicationId: String,
+            customEncodeClass: String?
+        ) {
             val name = variant.name.capitalized()
-            val taskName = Constant.BUILD_TASK_NAME.format(name)
+            val taskName = "generate${Constant.PLUGIN_CLASS_NAME}$name"
             if (project.getTasksByName(taskName, true).isNotEmpty()) {
                 return
             }
-            val dir =
-                File(project.layout.buildDirectory.get().asFile, Constant.OUTPUT_PATH.format(name))
+            val dir = File(
+                project.layout.buildDirectory.get().asFile,
+                "generated/source/${Constant.PLUGIN_NAME}/$name"
+            )
             val provider = project.tasks.register(taskName, StringBlurTask::class.java) {
                 it.applicationId.set(applicationId)
                 it.dir.set(dir)
+                it.customEncodeClass.set(customEncodeClass.orEmpty())
             }
             variant.registerJavaGeneratingTask(provider, dir)
         }

@@ -4,24 +4,15 @@ plugins {
 }
 
 dependencies {
-    implementation gradleApi()
-    implementation localGroovy()
-    implementation "org.ow2.asm:asm:9.8"
-    implementation "com.squareup:javawriter:2.5.1"
-    implementation "com.android.tools.build:gradle:7.3.0"
-    implementation project(":stringplugin-common")
-}
-
-javaToolchains {
-    version JavaVersion.VERSION_17
+    implementation 'com.github.megatronking.stringfog:interface:5.0.0'
 }
 
 publishing {
     publications {
-        StringBlurPlugin(MavenPublication) {
+        StringBlurCommon(MavenPublication) {
             from components.java
             groupId "com.android.string.plugin"
-            artifactId "stringblur"
+            artifactId "common"
             version VERSION
         }
     }

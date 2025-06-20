@@ -10,4 +10,5 @@ abstract class StringBlurExtension {
     var enable: Boolean = false
     var whiteList: List<String> = emptyList()
     var encodePackages: List<String>? = emptyList()
+    var customEncodeClass: String? = null
 }

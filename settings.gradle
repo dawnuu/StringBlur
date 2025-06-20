@@ -18,3 +18,4 @@ dependencyResolutionManagement {
 rootProject.name = "StringBlur"
 include ':app'
 include ':stringplugin-core'
+include ':stringplugin-common'

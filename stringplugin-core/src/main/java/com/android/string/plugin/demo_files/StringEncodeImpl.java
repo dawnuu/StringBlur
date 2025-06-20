@@ -1,24 +1,17 @@
-package com.android.string.plugin.files;
+package com.android.string.plugin.demo_files;
+//package applicationId.stringblur;
+
+import com.android.string.plugin.IString;
 
 /**
+ * 字符串加解密实现类
+ *
  * @author chancey
- * @date 2024/1/12   12:03
+ * @date 2024/1/12   12:08
  **/
-abstract class IString {
-
-    public abstract byte[] encryptBytes(String data, String key);
-
-    public abstract String encryptString(String data, String key);
-
-    public abstract String decryptBytes(byte[] data, byte[] key);
-
-    public abstract String decryptString(String data, String key);
-
-    public boolean overflow(byte[] data) {
-        return data != null && data.length != 0;
-    }
-
-    protected byte[] encrypt(byte[] data, String key) {
+public final class StringEncodeImpl implements IString {
+    @Override
+    public byte[] encrypt(byte[] data, String key) {
         int lenKey = key.length();
         int j = 0;
         for (int i = 0; i < data.length; i++) {
@@ -31,7 +24,8 @@ abstract class IString {
         return data;
     }
 
-    protected byte[] decrypt(byte[] data, byte[] key) {
+    @Override
+    public byte[] decrypt(byte[] data, byte[] key) {
         int lenKey = key.length;
         int j = 0;
         for (int i = 0; i < data.length; i++) {

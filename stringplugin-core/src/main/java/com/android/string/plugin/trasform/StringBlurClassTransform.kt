@@ -3,43 +3,17 @@ package com.android.string.plugin.trasform
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
-import com.android.build.api.instrumentation.InstrumentationParameters
-import com.android.string.plugin.data.Constant
+import com.android.string.plugin.trasform.parameters.StringBlurInstrumentationParameters
 import com.android.string.plugin.util.WhileLists
+import com.android.string.plugin.wrapper.StringBlurWrapper
 import org.objectweb.asm.ClassVisitor
 
 /**
  * @author chancey
  * @date   2023/9/5   20:36
  **/
-abstract class StringBlurClassTransform : AsmClassVisitorFactory<InstrumentationParameters.None> {
-
-    companion object {
-        private lateinit var key: String
-        private var useBytes = false
-        private lateinit var applicationId: String
-        private val encodePackages = mutableListOf<String>()
-        fun setParams(
-            key: String,
-            useBytes: Boolean,
-            applicationId: String,
-            whileList: List<String>,
-            encodePackages: List<String>?
-        ) {
-            this.key = key
-            this.useBytes = useBytes
-            this.applicationId = applicationId
-            //为空则加密全部
-            if (encodePackages != null) {
-                //将自身添加进加密列表
-                this.encodePackages.add(applicationId)
-                //追加自定义列表
-                this.encodePackages.addAll(encodePackages)
-            }
-            WhileLists.add(Constant.PLUGIN_CLASS_PACKAGE.format(applicationId))
-            WhileLists.add(whileList)
-        }
-    }
+abstract class StringBlurClassTransform :
+    AsmClassVisitorFactory<StringBlurInstrumentationParameters> {
 
     override fun isInstrumentable(classData: ClassData): Boolean {
         val className = classData.className
@@ -49,9 +23,20 @@ abstract class StringBlurClassTransform : AsmClassVisitorFactory<Instrumentation
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ) = StringBlurClassVisitor(nextClassVisitor, key, useBytes, applicationId)
+    ): ClassVisitor {
+        return with(parameters.get()) {
+            StringBlurClassVisitor(
+                nextClassVisitor,
+                key.get(),
+                useBytes.get(),
+                applicationId.get(),
+                StringBlurWrapper(customEncodeClass.get())
+            )
+        }
+    }
 
     private fun isInEncodePackages(className: String): Boolean {
+        val encodePackages = parameters.get().encodePackages.get()
         if (encodePackages.isEmpty()) {
             return true
         }

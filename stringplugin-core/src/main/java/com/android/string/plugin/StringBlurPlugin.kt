@@ -2,7 +2,8 @@ package com.android.string.plugin
 
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
-import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
@@ -23,7 +24,9 @@ class StringBlurPlugin : Plugin<Project> {
         target.extensions.create(Constant.PLUGIN_NAME, StringBlurExtension::class.java)
         val extension = target.extensions.findByType(BaseExtension::class.java)
             ?: throw GradleException(String.format(Logger.text("请添加插件")))
-        val components = target.extensions.getByType(AndroidComponentsExtension::class.java)
+        val components =
+            target.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
+                ?: target.extensions.getByType(LibraryAndroidComponentsExtension::class.java)
         components.onVariants {
             val stringblur = target.extensions.getByType(StringBlurExtension::class.java)
             if (!stringblur.enable) {
@@ -40,27 +43,30 @@ class StringBlurPlugin : Plugin<Project> {
             if (applicationId.isBlank()) {
                 throw GradleException(Logger.text("无法获取applicationId"))
             }
-            val whileList = stringblur.whiteList
-            val encodePackages = stringblur.encodePackages
-            StringBlurClassTransform.setParams(
-                generator.generate(),
-                useBytes = stringblur.useBytes,
-                applicationId,
-                whileList,
-                encodePackages
-            )
             it.instrumentation.transformClassesWith(
                 StringBlurClassTransform::class.java,
                 InstrumentationScope.ALL
-            ) {}
-            it.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
+            ) { params ->
+                params.setParams(generator, applicationId, stringblur)
+            }
+            it.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES)
             if (extension is AppExtension) {
                 extension.applicationVariants.all { variant ->
-                    StringBlurTask.execute(target, variant, applicationId)
+                    StringBlurTask.execute(
+                        target,
+                        variant,
+                        applicationId,
+                        stringblur.customEncodeClass
+                    )
                 }
             } else if (extension is LibraryExtension) {
                 extension.libraryVariants.all { variant ->
-                    StringBlurTask.execute(target, variant, applicationId)
+                    StringBlurTask.execute(
+                        target,
+                        variant,
+                        applicationId,
+                        stringblur.customEncodeClass
+                    )
                 }
             }
         }

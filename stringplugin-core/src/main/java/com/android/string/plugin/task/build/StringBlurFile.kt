@@ -1,29 +1,41 @@
-package com.android.string.plugin.task
+package com.android.string.plugin.task.build
 
 import com.android.string.plugin.data.Constant
+import com.android.string.plugin.task.BaseFile
 import com.squareup.javawriter.JavaWriter
 import javax.lang.model.element.Modifier
 
 /**
- * 生成java代码：StringBlur.java
+ * 生成解密调用类，内容见[com.android.string.plugin.demo_files.StringBlur]
  * @author chancey
  * @date   2023/9/5   17:24
  **/
 class StringBlurFile : BaseFile() {
 
-    override fun write(writer: JavaWriter, applicationId: String) {
-        writer.emitPackage(Constant.PLUGIN_PACKAGE.format(applicationId))
-            .emitImports(Constant.PLUGIN_IMPL_CLASS_PACKAGE.format(applicationId))
+    override fun write(writer: JavaWriter, applicationId: String, customEncodeClass: String?) {
+        val pkg = Constant.PLUGIN_CLASS_PACKAGE.format(applicationId)
+        val className = if (customEncodeClass.isNullOrBlank()) {
+            Constant.DEFAULT_IMPL_CLASS_NAME
+        } else {
+            customEncodeClass.substring(customEncodeClass.lastIndexOf(".") + 1)
+        }
+        val import = if (customEncodeClass.isNullOrBlank()) {
+            Constant.DEFAULT_IMPL_CLASS_FILE_PATH.format(applicationId)
+        } else {
+            customEncodeClass
+        }
+        writer.emitPackage(pkg)
+            .emitImports(import)
             .beginType(
                 Constant.PLUGIN_CLASS_NAME,
                 "class",
                 mutableSetOf(Modifier.PUBLIC, Modifier.FINAL),
             )
             .emitField(
-                Constant.PLUGIN_IMPL_CLASS_NAME,
+                className,
                 "IMPL",
                 mutableSetOf(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL),
-                "new ${Constant.PLUGIN_IMPL_CLASS_NAME}()"
+                "new $className()"
             )
             .beginMethod(
                 String::class.java.simpleName,
