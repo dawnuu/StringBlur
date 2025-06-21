@@ -17,7 +17,9 @@ import groovy.xml.XmlParser
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import java.io.File
 import java.nio.charset.Charset
+import java.util.Properties
 
 class StringBlurPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -49,6 +51,7 @@ class StringBlurPlugin : Plugin<Project> {
             ) { params ->
                 params.setParams(generator, applicationId, stringblur)
             }
+            appendImplementations(target)
             it.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES)
             if (extension is AppExtension) {
                 extension.applicationVariants.all { variant ->
@@ -70,6 +73,16 @@ class StringBlurPlugin : Plugin<Project> {
                 }
             }
         }
+    }
+
+    private fun appendImplementations(project: Project) {
+        val properties = Properties().apply {
+            load(File("gradle.properties").inputStream())
+        }
+        project.dependencies.add(
+            "implementation",
+            "com.android.string.plugin:common:${properties.getValue("VERSION")}"
+        )
     }
 
     private fun getApplicationId(target: Project, extension: BaseExtension): String {
