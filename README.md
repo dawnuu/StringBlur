@@ -1,10 +1,12 @@
+##### lastest:1.1.5
+
 ##### 1、在根目录build.gradle中引入插件依赖。
 
 ```
 buildscript {
     dependencies {
         ...
-        classpath "com.android.string.plugin:stringblur:1.1.2"
+        classpath "com.android.string.plugin:stringblur:${lastest}"
     }
 }
 ```
@@ -20,6 +22,8 @@ stringblur {
     whiteList = ['com.xxx.xxx'] //白名单，默认加密全部，例：不加密MainActivity类['com.xxx.xxx.MainActivity']，不加密某个包['com.xxx.xxx']
     //1.1.3之前：默认加密全部，1.1.3修改为：null时加密全部，[]空列表时加密自身，非空列表则追加自定义列表
     encodePackages = ['com.xxx.xxx']
+    //1.1.5新增
+    customEncodeClass = "com.xxx.xxx.Impl" //自定义加密，需要实现IString接口，implementation "com.android.string.plugin:common:${lastest}"
     // 1.1.0版本移除以下字段
     pkg 'stringblur' //加密相关类所在路径，默认在包名下的stringblur目录中，可以移动到其他目录，如encode.test，则移动到包名下的encode/test中 
     alias 'StringBlur' //加密类别名，默认加密类为StringBlur.java
@@ -29,6 +33,22 @@ stringblur {
 ```
 
 ## 更新日志
+
+### v1.1.5
+
+- 新增customEncodeClass属性：支持自定义加密类
+
+### v1.1.3
+
+- encodePackages属性修改：null加密全部，[]加密自身，[xxx]追加xxx加密
+
+### v1.1.2
+
+- 修改为默认仅加密自身
+
+### v1.1.1
+
+- 兼容性优化
 
 ### v1.1.0
 
