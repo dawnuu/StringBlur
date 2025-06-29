@@ -28,7 +28,12 @@ object Constant {
     /**
      *  默认加解密实现类类名
      */
-    const val DEFAULT_IMPL_CLASS_NAME = "StringEncodeImpl"
+    const val DEFAULT_IMPL_CLASS_NAME = "DefaultEncodeImpl"
+
+    /**
+     * xor加解密实现类类名
+     */
+    const val XOR_IMPL_CLASS_NAME = "XorEncodeImpl"
 
     /**
      * 加解密抽象接口
@@ -39,4 +44,5 @@ object Constant {
      * 默认用于输出到应用层的加密类完整路径
      */
     const val DEFAULT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$DEFAULT_IMPL_CLASS_NAME"
+    const val XOR_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_IMPL_CLASS_NAME"
 }

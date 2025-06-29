@@ -1,5 +1,7 @@
 package com.android.string.plugin
 
+import com.android.string.plugin.mode.Mode
+
 /**
  * @author chancey
  * @date   2023/9/5   16:07
@@ -10,5 +12,5 @@ abstract class StringBlurExtension {
     var enable: Boolean = false
     var whiteList: List<String> = emptyList()
     var encodePackages: List<String>? = emptyList()
-    var customEncodeClass: String? = null
+    var mode: Mode = Mode.DEFAULT
 }

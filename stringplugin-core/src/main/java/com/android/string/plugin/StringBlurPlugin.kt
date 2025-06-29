@@ -57,7 +57,7 @@ class StringBlurPlugin : Plugin<Project> {
                         target,
                         variant,
                         applicationId,
-                        stringblur.customEncodeClass
+                        stringblur.mode
                     )
                 }
             } else if (extension is LibraryExtension) {
@@ -66,7 +66,7 @@ class StringBlurPlugin : Plugin<Project> {
                         target,
                         variant,
                         applicationId,
-                        stringblur.customEncodeClass
+                        stringblur.mode
                     )
                 }
             }
@@ -76,7 +76,7 @@ class StringBlurPlugin : Plugin<Project> {
     private fun appendImplementations(project: Project) {
         project.dependencies.add(
             "implementation",
-            "com.android.string.plugin:common:1.1.5"
+            "com.android.string.plugin:common:1.1.6"
         )
     }
 

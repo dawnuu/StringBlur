@@ -1,5 +1,6 @@
 package com.android.string.plugin.task
 
+import com.android.string.plugin.mode.Mode
 import com.squareup.javawriter.JavaWriter
 import java.io.File
 import java.io.FileWriter
@@ -10,14 +11,14 @@ import java.io.FileWriter
  **/
 abstract class BaseFile {
 
-    fun create(path: File, applicationId: String, customEncodeClass: String?) {
+    fun create(path: File, applicationId: String, mode: Mode) {
         val file = File(path, getFileName(applicationId))
         JavaWriter(FileWriter(file)).use {
-            write(it, applicationId, customEncodeClass)
+            write(it, applicationId, mode)
         }
     }
 
-    abstract fun write(writer: JavaWriter, applicationId: String, customEncodeClass: String?)
+    abstract fun write(writer: JavaWriter, applicationId: String, mode: Mode)
 
     abstract fun getFileName(applicationId: String): String
 }

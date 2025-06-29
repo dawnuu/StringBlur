@@ -6,7 +6,8 @@ package com.android.string.plugin.demo_files;
  * @date 2025/6/19
  **/
 public final class StringBlur {
-    private static final StringEncodeImpl IMPL = new StringEncodeImpl();
+    private static final DefaultEncodeImpl IMPL = new DefaultEncodeImpl();
+//    private static final XorEncodeImpl IMPL = new XorEncodeImpl();
 
     public static String decrypt(String value, String key) {
         return IMPL.decryptString(value, key);

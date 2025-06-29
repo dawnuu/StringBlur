@@ -1,7 +1,9 @@
 package com.android.string.plugin.task.build
 
 import com.android.string.plugin.data.Constant
+import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.task.BaseFile
+import com.android.string.plugin.util.ModeUtils
 import com.squareup.javawriter.JavaWriter
 import javax.lang.model.element.Modifier
 
@@ -12,18 +14,10 @@ import javax.lang.model.element.Modifier
  **/
 class StringBlurFile : BaseFile() {
 
-    override fun write(writer: JavaWriter, applicationId: String, customEncodeClass: String?) {
+    override fun write(writer: JavaWriter, applicationId: String, mode: Mode) {
         val pkg = Constant.PLUGIN_CLASS_PACKAGE.format(applicationId)
-        val className = if (customEncodeClass.isNullOrBlank()) {
-            Constant.DEFAULT_IMPL_CLASS_NAME
-        } else {
-            customEncodeClass.substring(customEncodeClass.lastIndexOf(".") + 1)
-        }
-        val import = if (customEncodeClass.isNullOrBlank()) {
-            Constant.DEFAULT_IMPL_CLASS_FILE_PATH.format(applicationId)
-        } else {
-            customEncodeClass
-        }
+        val className = ModeUtils.getEncodeImplClassName(mode)
+        val import = ModeUtils.getEncodeImplClassFilePath(mode, applicationId)
         writer.emitPackage(pkg)
             .emitImports(import)
             .beginType(

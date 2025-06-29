@@ -2,9 +2,10 @@ package com.android.string.plugin.task
 
 import com.android.build.gradle.api.BaseVariant
 import com.android.string.plugin.data.Constant
+import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.task.build.StringBlurFile
-import com.android.string.plugin.task.build.StringEncodeImplFile
 import com.android.string.plugin.util.Logger
+import com.android.string.plugin.util.ModeUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
@@ -29,15 +30,10 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
         if (!path.exists()) {
             path.mkdirs()
         }
-        val customEncodeClass = customEncodeClass.get()
-        if (customEncodeClass.isNullOrBlank()) {
-            StringEncodeImplFile().create(path, applicationId.get(), "")
-        }
-        StringBlurFile().create(path, applicationId.get(), customEncodeClass)
+        val mode = mode.get()
+        ModeUtils.getEncodeImplFile(mode).create(path, applicationId.get(), mode)
+        StringBlurFile().create(path, applicationId.get(), mode)
     }
-
-    @get:Input
-    abstract val customEncodeClass: Property<String>
 
     @get:Input
     abstract val applicationId: Property<String>
@@ -45,12 +41,15 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
     @get:Input
     abstract val dir: Property<File>
 
+    @get:Input
+    abstract val mode: Property<Mode>
+
     companion object {
         fun execute(
             project: Project,
             variant: BaseVariant,
             applicationId: String,
-            customEncodeClass: String?
+            mode: Mode
         ) {
             val name = variant.name.capitalized()
             val taskName = "generate${Constant.PLUGIN_CLASS_NAME}$name"
@@ -64,7 +63,7 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
             val provider = project.tasks.register(taskName, StringBlurTask::class.java) {
                 it.applicationId.set(applicationId)
                 it.dir.set(dir)
-                it.customEncodeClass.set(customEncodeClass.orEmpty())
+                it.mode.set(mode)
             }
             variant.registerJavaGeneratingTask(provider, dir)
         }

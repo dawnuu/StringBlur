@@ -1,18 +1,15 @@
 package com.android.string.plugin.wrapper
 
 import com.android.string.plugin.IString
-import com.android.string.plugin.demo_files.StringEncodeImpl
+import com.android.string.plugin.mode.Mode
+import com.android.string.plugin.util.ModeUtils
 
 /**
  * @author chancey
  * @date   2025/6/20
  **/
-class StringBlurWrapper(customEncodeClass: String?) : IString {
-    private val impl = if (customEncodeClass.isNullOrBlank()) {
-        StringEncodeImpl()
-    } else {
-        Class.forName(customEncodeClass).getDeclaredConstructor().newInstance() as IString
-    }
+class StringBlurWrapper(mode: Mode) : IString {
+    private val impl = ModeUtils.getEncodeImpl(mode)
 
     override fun encrypt(data: ByteArray?, key: String?): ByteArray? {
         return impl.encrypt(data, key)

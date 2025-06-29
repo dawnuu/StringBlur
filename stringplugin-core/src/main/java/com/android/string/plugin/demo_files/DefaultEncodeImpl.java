@@ -9,7 +9,7 @@ import com.android.string.plugin.IString;
  * @author chancey
  * @date 2024/1/12   12:08
  **/
-public final class StringEncodeImpl implements IString {
+public final class DefaultEncodeImpl implements IString {
     @Override
     public byte[] encrypt(byte[] data, String key) {
         int lenKey = key.length();
