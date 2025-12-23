@@ -5,10 +5,10 @@ import com.android.string.plugin.StringBlurExtension
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.util.ModeUtils
-import com.android.string.plugin.util.WhileLists
 import com.android.string.plugin.util.generator.Generator
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 
 /**
@@ -29,23 +29,29 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     abstract val encodePackages: ListProperty<String>
 
     @get:Input
+    abstract val whiteList: ListProperty<String>
+
+    @get:Input
     abstract val mode: Property<Mode>
 
-    fun setParams(generator: Generator, applicationId: String, extension: StringBlurExtension) {
+    fun setParams(generator: Generator, applicationId: Provider<String>, extension: StringBlurExtension) {
         this.key.set(generator.generate())
         this.useBytes.set(extension.useBytes)
         this.applicationId.set(applicationId)
         this.mode.set(extension.mode)
-        //为空则加密全部
+        
+        this.whiteList.addAll(extension.whiteList)
+        this.whiteList.add("BuildConfig")
+        this.whiteList.add("R2")
+        this.whiteList.add("R")
+        this.whiteList.add("IString")
+        this.whiteList.add(Constant.DEFAULT_IMPL_CLASS_NAME)
+        this.whiteList.add(applicationId.map { Constant.PLUGIN_CLASS_PACKAGE.format(it) })
+        this.whiteList.add(applicationId.map { ModeUtils.getEncodeImplClassFilePath(extension.mode, it) })
+
         if (extension.encodePackages != null) {
-            //将自身添加进加密列表
             this.encodePackages.add(applicationId)
-            //追加自定义列表
             this.encodePackages.addAll(extension.encodePackages!!)
         }
-        WhileLists.add(Constant.PLUGIN_CLASS_PACKAGE.format(applicationId))
-        //将加密类添加到白名单
-        WhileLists.add(ModeUtils.getEncodeImplClassFilePath(extension.mode, applicationId))
-        WhileLists.add(extension.whiteList)
     }
 }

@@ -8,7 +8,7 @@ Properties props = new Properties()
 props.load(new FileInputStream(file("keystore/CleanSwipe.properties")))
 android {
     namespace 'com.example.myapplication'
-    compileSdk 34
+    compileSdk 36
     signingConfigs {
         CleanSwipe {
             keyAlias props['KEY_ALIAS']

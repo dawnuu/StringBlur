@@ -4,7 +4,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.string.plugin.trasform.parameters.StringBlurInstrumentationParameters
-import com.android.string.plugin.util.WhileLists
+import com.android.string.plugin.util.Logger
 import com.android.string.plugin.wrapper.StringBlurWrapper
 import org.objectweb.asm.ClassVisitor
 
@@ -17,7 +17,18 @@ abstract class StringBlurClassTransform :
 
     override fun isInstrumentable(classData: ClassData): Boolean {
         val className = classData.className
-        return !WhileLists.contains(className) && isInEncodePackages(className)
+        val whiteList = parameters.get().whiteList.get()
+        
+        val isInWhiteList = whiteList.any { whiteEntry ->
+            className.endsWith(whiteEntry) || className.startsWith(whiteEntry)
+        }
+        
+        if (isInWhiteList) {
+            Logger.log("白名单:$className")
+            return false
+        }
+
+        return isInEncodePackages(className)
     }
 
     override fun createClassVisitor(
