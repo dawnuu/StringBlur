@@ -25,7 +25,7 @@ stringblur {
     //1.1.5新增，1.1.6删除
     customEncodeClass = "com.xxx.xxx.Impl" //自定义加密，需要实现IString接口，implementation "com.android.string.plugin:common:${lastest}"
     //1.1.6新增
-    mode = Mode.DEFAULT/Mode.XOR //import com.android.string.plugin.mode.Mode
+    mode = Mode.DEFAULT/Mode.XOR/Mode.REVERSE/Mode.SHIFT/Mode.XOR_SHIFT //import com.android.string.plugin.mode.Mode
     // 1.1.0版本移除以下字段
     pkg 'stringblur' //加密相关类所在路径，默认在包名下的stringblur目录中，可以移动到其他目录，如encode.test，则移动到包名下的encode/test中 
     alias 'StringBlur' //加密类别名，默认加密类为StringBlur.java
@@ -39,6 +39,15 @@ stringblur {
 ### v1.1.7
 - 最低AGP7.4.0
 - 适配AGP9
+- 新增加密方式：REVERSE、SHIFT、XOR_SHIFT
+
+## 加密方式
+
+- `Mode.DEFAULT`：按 key 对字节做加减变换，默认模式
+- `Mode.XOR`：按 key 对字节做异或变换
+- `Mode.REVERSE`：反转字节顺序
+- `Mode.SHIFT`：按 key 低位对字节做位移变换
+- `Mode.XOR_SHIFT`：组合 XOR 与 SHIFT 变换
 
 ### v1.1.6
 

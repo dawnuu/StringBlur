@@ -7,4 +7,7 @@ package com.android.string.plugin.mode
 enum class Mode {
     DEFAULT,
     XOR,
+    REVERSE,
+    SHIFT,
+    XOR_SHIFT,
 }
