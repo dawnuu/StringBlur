@@ -34,11 +34,25 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     @get:Input
     abstract val mode: Property<Mode>
 
-    fun setParams(generator: Generator, applicationId: Provider<String>, extension: StringBlurExtension) {
+    @get:Input
+    abstract val variantName: Property<String>
+
+    @get:Input
+    abstract val reportPath: Property<String>
+
+    fun setParams(
+        generator: Generator,
+        applicationId: Provider<String>,
+        extension: StringBlurExtension,
+        variantName: String,
+        reportPath: Provider<String>
+    ) {
         this.key.set(generator.generate())
         this.useBytes.set(extension.useBytes)
         this.applicationId.set(applicationId)
         this.mode.set(extension.mode)
+        this.variantName.set(variantName)
+        this.reportPath.set(reportPath)
         
         this.whiteList.addAll(extension.whiteList)
         this.whiteList.add("BuildConfig")

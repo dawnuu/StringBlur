@@ -40,6 +40,22 @@ stringblur {
 - 最低AGP7.4.0
 - 适配AGP9
 - 新增加密方式：REVERSE、SHIFT、XOR_SHIFT
+- 新增加密报告：输出扫描、跳过和加密明细
+
+## 加密报告
+
+开启插件后会按 variant 生成报告文件：
+
+```
+build/reports/stringblur/{variant}.txt
+```
+
+报告包含扫描类数量、跳过类数量、加密字符串数量、忽略字符串数量，以及每个事件的明细。常见事件如下：
+
+- `SCAN`：扫描到 class
+- `SKIP`：class 因白名单或 encodePackages 范围被跳过
+- `ENCRYPT`：字符串已加密
+- `IGNORE`：LDC 常量未加密，例如空字符串或非字符串常量
 
 ## 加密方式
 

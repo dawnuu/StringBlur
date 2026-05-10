@@ -16,8 +16,9 @@ class StringBlurClassVisitor(
     useBytes: Boolean,
     applicationId: String,
     stringWrapper: IString,
+    reportPath: String,
 ) : ClassVisitor(Opcodes.ASM9, cv) {
-    private val controller = ClassVisitorController(applicationId, key, useBytes, stringWrapper)
+    private val controller = ClassVisitorController(applicationId, key, useBytes, stringWrapper, reportPath)
     override fun visit(
         version: Int,
         access: Int,

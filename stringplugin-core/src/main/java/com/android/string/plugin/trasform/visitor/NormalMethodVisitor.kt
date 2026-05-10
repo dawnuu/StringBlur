@@ -12,7 +12,8 @@ import org.objectweb.asm.Opcodes
 class NormalMethodVisitor(
     private val access: Int,
     mv: MethodVisitor,
-    private val controller: ClassVisitorController
+    private val controller: ClassVisitorController,
+    private val methodName: String?
 ) : MethodVisitor(Opcodes.ASM9, mv) {
     override fun visitLdcInsn(value: Any?) {
         // If the value is a static final field
@@ -47,10 +48,11 @@ class NormalMethodVisitor(
                     }
                 }
                 // local variables
-                controller.write(value, mv)
+                controller.write(value, mv, methodName)
             }
             return
         }
+        controller.reportIgnoredLdc(methodName, value)
         super.visitLdcInsn(value)
     }
 }

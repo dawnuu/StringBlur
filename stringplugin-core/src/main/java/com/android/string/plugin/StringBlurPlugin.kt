@@ -5,6 +5,7 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.string.plugin.data.Constant
+import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.task.StringBlurTask
 import com.android.string.plugin.trasform.StringBlurClassTransform
 import com.android.string.plugin.util.Logger
@@ -36,12 +37,22 @@ class StringBlurPlugin : Plugin<Project> {
 
             // 使用 Provider 避免配置阶段 namespace 未就绪的问题
             val applicationId = variant.namespace
+            val reportPath = target.layout.buildDirectory
+                .file("reports/${Constant.PLUGIN_NAME}/${variant.name}.txt")
+                .map { it.asFile.absolutePath }
+
+            StringBlurReport.init(
+                reportPath.get(),
+                variant.name,
+                stringblur.mode.name,
+                stringblur.useBytes
+            )
 
             variant.instrumentation.transformClassesWith(
                 StringBlurClassTransform::class.java,
                 InstrumentationScope.ALL
             ) { params ->
-                params.setParams(generator, applicationId, stringblur)
+                params.setParams(generator, applicationId, stringblur, variant.name, reportPath)
             }
 
             variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES)

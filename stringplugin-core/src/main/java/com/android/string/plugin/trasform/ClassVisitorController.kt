@@ -3,6 +3,7 @@ package com.android.string.plugin.trasform
 import com.android.string.plugin.IString
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.field.StringFiled
+import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
 import com.android.string.plugin.trasform.visitor.InitMethodVisitor
 import com.android.string.plugin.trasform.visitor.NormalMethodVisitor
@@ -18,7 +19,8 @@ class ClassVisitorController(
     applicationId: String,
     private val key: String,
     private val useBytes: Boolean,
-    private val stringBlurWrapper: IString
+    private val stringBlurWrapper: IString,
+    private val reportPath: String
 ) {
     private val stringBlurClassName =
         Constant.PLUGIN_CLASS_FILE_PATH.format(applicationId).replace(".", "/")
@@ -71,18 +73,35 @@ class ClassVisitorController(
             // If clinit exists meaning the static fields (not final) would have be inited here.
             "<clinit>" -> {
                 isClInitExists = true
-                ClinitMethodVisitor(mv, this)
+                ClinitMethodVisitor(mv, this, name)
             }
             // Here init final(not static) and normal fields
-            "<init>" -> InitMethodVisitor(mv, this)
-            else -> NormalMethodVisitor(access, mv, this)
+            "<init>" -> InitMethodVisitor(mv, this, name)
+            else -> NormalMethodVisitor(access, mv, this, name)
         }
     }
 
 
     fun overflow(data: String?) = stringBlurWrapper.overflow(data?.toByteArray())
 
-    fun write(data: String?, mv: MethodVisitor) {
+    fun reportEncrypted(methodName: String?, data: String?) {
+        StringBlurReport.encrypted(reportPath, currentClassName, methodName, data)
+    }
+
+    fun reportIgnored(methodName: String?, value: Any?, reason: String) {
+        StringBlurReport.ignored(reportPath, currentClassName, methodName, value, reason)
+    }
+
+    fun reportIgnoredLdc(methodName: String?, value: Any?) {
+        if (value is String && !overflow(value)) {
+            reportIgnored(methodName, value, "emptyString")
+        } else if (value !is String) {
+            reportIgnored(methodName, value, "notStringLdc")
+        }
+    }
+
+    fun write(data: String?, mv: MethodVisitor, methodName: String? = null) {
+        reportEncrypted(methodName, data)
         if (useBytes) {
             writeByBytes(data, mv)
         } else {

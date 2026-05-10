@@ -9,7 +9,11 @@ import org.objectweb.asm.Opcodes
  * @author chancey
  * @date   2023/12/9   20:33
  **/
-class ClinitMethodVisitor(mv: MethodVisitor, private val controller: ClassVisitorController) :
+class ClinitMethodVisitor(
+    mv: MethodVisitor,
+    private val controller: ClassVisitorController,
+    private val methodName: String?
+) :
     MethodVisitor(Opcodes.ASM9, mv) {
     private var temp: String? = null
     override fun visitCode() {
@@ -19,7 +23,7 @@ class ClinitMethodVisitor(mv: MethodVisitor, private val controller: ClassVisito
             if (!controller.overflow(it.value)) {
                 return
             }
-            controller.write(it.value, mv)
+            controller.write(it.value, mv, methodName)
             super.visitFieldInsn(
                 Opcodes.PUTSTATIC,
                 controller.currentClassName,
@@ -33,9 +37,10 @@ class ClinitMethodVisitor(mv: MethodVisitor, private val controller: ClassVisito
         // Here init static or static final fields, but we must check field name int 'visitFieldInsn'
         if (value is String && controller.overflow(value)) {
             temp = value
-            controller.write(value, mv)
+            controller.write(value, mv, methodName)
         } else {
             temp = null
+            controller.reportIgnoredLdc(methodName, value)
             super.visitLdcInsn(value)
         }
     }

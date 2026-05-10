@@ -3,6 +3,7 @@ package com.android.string.plugin.trasform
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
+import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.trasform.parameters.StringBlurInstrumentationParameters
 import com.android.string.plugin.util.Logger
 import com.android.string.plugin.wrapper.StringBlurWrapper
@@ -17,7 +18,10 @@ abstract class StringBlurClassTransform :
 
     override fun isInstrumentable(classData: ClassData): Boolean {
         val className = classData.className
-        val whiteList = parameters.get().whiteList.get()
+        val params = parameters.get()
+        val reportPath = params.reportPath.get()
+        val whiteList = params.whiteList.get()
+        StringBlurReport.scanned(reportPath, className)
         
         val isInWhiteList = whiteList.any { whiteEntry ->
             className.endsWith(whiteEntry) || className.startsWith(whiteEntry)
@@ -25,10 +29,15 @@ abstract class StringBlurClassTransform :
         
         if (isInWhiteList) {
             Logger.log("白名单:$className")
+            StringBlurReport.skipped(reportPath, className, "whiteList")
             return false
         }
 
-        return isInEncodePackages(className)
+        val isInEncodePackages = isInEncodePackages(className)
+        if (!isInEncodePackages) {
+            StringBlurReport.skipped(reportPath, className, "encodePackages")
+        }
+        return isInEncodePackages
     }
 
     override fun createClassVisitor(
@@ -41,7 +50,8 @@ abstract class StringBlurClassTransform :
                 key.get(),
                 useBytes.get(),
                 applicationId.get(),
-                StringBlurWrapper(mode.get())
+                StringBlurWrapper(mode.get()),
+                reportPath.get()
             )
         }
     }
