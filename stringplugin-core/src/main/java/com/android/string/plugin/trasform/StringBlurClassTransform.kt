@@ -5,7 +5,6 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.trasform.parameters.StringBlurInstrumentationParameters
-import com.android.string.plugin.util.Logger
 import com.android.string.plugin.wrapper.StringBlurWrapper
 import org.objectweb.asm.ClassVisitor
 
@@ -28,7 +27,6 @@ abstract class StringBlurClassTransform :
         }
         
         if (isInWhiteList) {
-            Logger.log("白名单:$className")
             StringBlurReport.skipped(reportPath, className, "whiteList")
             return false
         }

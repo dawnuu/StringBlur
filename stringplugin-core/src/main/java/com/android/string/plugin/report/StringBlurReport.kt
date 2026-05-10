@@ -16,11 +16,6 @@ object StringBlurReport {
                         "Variant: $variantName\n" +
                         "Mode: $mode\n" +
                         "BytesMode: $bytesMode\n\n" +
-                        "Summary:\n" +
-                        "Classes scanned: 0\n" +
-                        "Classes skipped: 0\n" +
-                        "Strings encrypted: 0\n" +
-                        "Strings ignored: 0\n\n" +
                         "Events:\n"
             )
         }
@@ -57,7 +52,6 @@ object StringBlurReport {
             val file = File(reportPath)
             file.parentFile?.mkdirs()
             file.appendText(line + "\n")
-            writeSummary(file, stats.getOrPut(reportPath) { Stats() })
         }
     }
 
@@ -65,25 +59,6 @@ object StringBlurReport {
         synchronized(lock) {
             block(stats.getOrPut(reportPath) { Stats() })
         }
-    }
-
-    private fun writeSummary(file: File, stats: Stats) {
-        val text = file.readText()
-        val updated = text.replace(
-            Regex(
-                "Summary:\\n" +
-                        "Classes scanned: \\d+\\n" +
-                        "Classes skipped: \\d+\\n" +
-                        "Strings encrypted: \\d+\\n" +
-                        "Strings ignored: \\d+"
-            ),
-            "Summary:\n" +
-                    "Classes scanned: ${stats.classesScanned}\n" +
-                    "Classes skipped: ${stats.classesSkipped}\n" +
-                    "Strings encrypted: ${stats.stringsEncrypted}\n" +
-                    "Strings ignored: ${stats.stringsIgnored}"
-        )
-        file.writeText(updated)
     }
 
     private fun sanitize(value: Any?): String {
