@@ -1,111 +1,132 @@
-##### lastest:1.1.7
+# StringBlur
 
-##### 1、在根目录build.gradle中引入插件依赖。
+最新版本：`2.0.0`
 
-```
-buildscript {
-    dependencies {
-        ...
-        classpath "com.android.string.plugin:stringblur:${lastest}"
+StringBlur 是一个 Android Gradle 插件，用于在构建阶段对 class 中的字符串常量进行加密，并在运行时自动解密。
+
+## 安装
+
+### plugins DSL / Version Catalog
+
+在 `settings.gradle` 中配置插件仓库：
+
+```groovy
+pluginManagement {
+    repositories {
+        maven { url uri('/Users/dawn/Projects/maven/gradle') }
+        google()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 ```
 
-##### 2、在app或lib的build.gradle中配置插件。
+在 `gradle/libs.versions.toml` 中声明插件：
 
+```toml
+[plugins]
+stringblur = { id = "stringblur", version = "2.0.0" }
 ```
-apply plugin: 'stringblur'
 
-stringblur {
-    key 'Hello World' //加密key，自由定义，1.1.0版本支持随机密钥，如key 6，表示随机生成长度为6的密钥
-    enable true //混淆开关，默认关闭
-    whiteList = ['com.xxx.xxx'] //白名单，默认加密全部，例：不加密MainActivity类['com.xxx.xxx.MainActivity']，不加密某个包['com.xxx.xxx']
-    //1.1.3之前：默认加密全部，1.1.3修改为：null时加密全部，[]空列表时只加密当前 applicationId/namespace，非空列表则在当前 applicationId/namespace 基础上追加自定义包名
-    encodePackages = ['com.xxx.xxx']
-    //1.1.5新增，1.1.6删除
-    customEncodeClass = "com.xxx.xxx.Impl" //自定义加密，需要实现IString接口，implementation "com.android.string.plugin:common:${lastest}"
-    //1.1.6新增
-    mode = Mode.DEFAULT/Mode.XOR/Mode.REVERSE/Mode.SHIFT/Mode.XOR_SHIFT //import com.android.string.plugin.mode.Mode
-    // 1.1.0版本移除以下字段
-    pkg 'stringblur' //加密相关类所在路径，默认在包名下的stringblur目录中，可以移动到其他目录，如encode.test，则移动到包名下的encode/test中 
-    alias 'StringBlur' //加密类别名，默认加密类为StringBlur.java
-    // 1.1.0版本新增字段
-    useBytes false //是否使用字节码形式加密，默认关闭，开启后加密内容将显示new byte[]形式
-    minLength 0 //最小加密长度，默认0；例如设置为3时，长度小于3的字符串不会加密
+根目录 `build.gradle`：
+
+```groovy
+plugins {
+    alias(libs.plugins.stringblur) apply false
 }
 ```
 
-## 更新日志
+app 或 library 模块 `build.gradle`：
 
-### v1.1.7
-- 最低AGP7.4.0
-- 适配AGP9
-- 新增加密方式：REVERSE、SHIFT、XOR_SHIFT
-- 新增加密报告：输出扫描、跳过和加密明细
-- 新增minLength属性：过滤过短字符串
+```groovy
+plugins {
+    alias(libs.plugins.stringblur)
+}
+```
+
+### buildscript
+
+也可以使用传统 `buildscript` 方式：
+
+```groovy
+buildscript {
+    repositories {
+        maven { url uri('/Users/dawn/Projects/maven/gradle') }
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.string.plugin:stringblur:2.0.0'
+    }
+}
+```
+
+模块 `build.gradle`：
+
+```groovy
+apply plugin: 'stringblur'
+```
+
+## 配置
+
+```groovy
+import com.android.string.plugin.mode.BytesMode
+import com.android.string.plugin.mode.Mode
+
+stringblur {
+    key 'Hello World'
+    enable true
+
+    whiteList = ['com.xxx.xxx.BuildConfig']
+    encodePackages = ['com.xxx.xxx']
+
+    modes = [Mode.XOR, Mode.SHIFT, Mode.XOR_SHIFT]
+    bytesMode = BytesMode.STRING
+    minLength 3
+}
+```
+
+## 配置项
+
+- `key`：加密密钥。支持字符串，也支持整数随机长度，例如 `key 16`。
+- `enable`：是否开启字符串加密，默认 `false`。
+- `whiteList`：类名或包名前缀白名单，匹配到的 class 不处理。
+- `encodePackages`：加密范围。`null` 表示处理全部 class；空列表表示只处理当前 applicationId/namespace；非空列表会在当前 applicationId/namespace 基础上追加包名前缀。
+- `modes`：加密方式列表。每个字符串会从列表中随机选择一种方式，默认 `[Mode.DEFAULT]`。
+- `bytesMode`：密文承载方式，默认 `BytesMode.STRING`。
+- `minLength`：最小加密长度，长度小于该值的字符串会跳过，默认 `0`。
+
+## 加密方式
+
+- `Mode.DEFAULT`：按 key 对字节做加减变换。
+- `Mode.XOR`：按 key 对字节做异或变换。
+- `Mode.REVERSE`：反转字节顺序。
+- `Mode.SHIFT`：按 key 低位对字节做位移变换。
+- `Mode.XOR_SHIFT`：组合 XOR 与 SHIFT 变换。
+
+## 密文承载方式
+
+- `BytesMode.STRING`：密文写成字符串常量。
+- `BytesMode.BYTES`：密文写成 byte array。
+- `BytesMode.RANDOM`：每个字符串随机选择 `STRING` 或 `BYTES`。
 
 ## 加密报告
 
 开启插件后会按 variant 生成报告文件：
 
-```
+```text
 build/reports/stringblur/{variant}.txt
 ```
 
-报告包含扫描类数量、跳过类数量、加密字符串数量、忽略字符串数量，以及每个事件的明细。常见事件如下：
+报告事件包括：
 
-- `SCAN`：扫描到 class
-- `SKIP`：class 因白名单或 encodePackages 范围被跳过
-- `ENCRYPT`：字符串已加密
-- `IGNORE`：LDC 常量未加密，例如空字符串或非字符串常量
-- `tooShort`：字符串长度小于 minLength，因此未加密
+- `SCAN`：扫描到 class。
+- `SKIP`：class 因白名单或 `encodePackages` 范围被跳过。
+- `ENCRYPT`：字符串已加密，并记录实际使用的 `mode` 和 `bytesMode`。
+- `IGNORE`：LDC 常量未加密，例如空字符串、非字符串常量或长度小于 `minLength`。
 
-## 加密方式
+## 注意事项
 
-- `Mode.DEFAULT`：按 key 对字节做加减变换，默认模式
-- `Mode.XOR`：按 key 对字节做异或变换
-- `Mode.REVERSE`：反转字节顺序
-- `Mode.SHIFT`：按 key 低位对字节做位移变换
-- `Mode.XOR_SHIFT`：组合 XOR 与 SHIFT 变换
-
-### v1.1.6
-
-- 新增mode属性：选择加密方式，DEFAULT、XOR
-- 删除customEncodeClass属性
-
-### v1.1.5
-
-- 新增customEncodeClass属性：支持自定义加密类
-
-### v1.1.3
-
-- encodePackages属性修改：null加密全部，[]加密自身，[xxx]追加xxx加密
-
-### v1.1.2
-
-- 修改为默认仅加密自身
-
-### v1.1.1
-
-- 兼容性优化
-
-### v1.1.0
-
-- 增加随机密钥功能
-- 支持使用字节码形式加密
-- 移除自定义类名字段
-
-### v1.0.2
-
-- 加密优化：解决部分字段无法加密问题
-- 修复encodePackages不配置时无法加密的问题
-
-### v1.0.1
-
-- 优化白名单功能
-- 增加自定义加密类功能
-- 兼容性优化：支持AGP8，最低需要gradle7.4
-
-### v1.0.0
-
-- 初始版本
+- 注解参数字符串不能替换为运行时解密调用，因此不会按普通字符串加密。
+- 资源、Manifest、assets、raw 等文件不属于 class ASM 处理范围。
+- 插件默认使用 `InstrumentationScope.ALL`，会处理项目 class 和依赖 class；依赖较多时构建耗时会增加。
