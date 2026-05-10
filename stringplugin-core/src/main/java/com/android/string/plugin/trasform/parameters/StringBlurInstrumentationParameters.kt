@@ -35,6 +35,9 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     abstract val mode: Property<Mode>
 
     @get:Input
+    abstract val minLength: Property<Int>
+
+    @get:Input
     abstract val variantName: Property<String>
 
     @get:Input
@@ -51,6 +54,7 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
         this.useBytes.set(extension.useBytes)
         this.applicationId.set(applicationId)
         this.mode.set(extension.mode)
+        this.minLength.set(extension.minLength.coerceAtLeast(0))
         this.variantName.set(variantName)
         this.reportPath.set(reportPath)
         

@@ -31,6 +31,7 @@ stringblur {
     alias 'StringBlur' //加密类别名，默认加密类为StringBlur.java
     // 1.1.0版本新增字段
     useBytes false //是否使用字节码形式加密，默认关闭，开启后加密内容将显示new byte[]形式
+    minLength 0 //最小加密长度，默认0；例如设置为3时，长度小于3的字符串不会加密
 }
 ```
 
@@ -41,6 +42,7 @@ stringblur {
 - 适配AGP9
 - 新增加密方式：REVERSE、SHIFT、XOR_SHIFT
 - 新增加密报告：输出扫描、跳过和加密明细
+- 新增minLength属性：过滤过短字符串
 
 ## 加密报告
 
@@ -56,6 +58,7 @@ build/reports/stringblur/{variant}.txt
 - `SKIP`：class 因白名单或 encodePackages 范围被跳过
 - `ENCRYPT`：字符串已加密
 - `IGNORE`：LDC 常量未加密，例如空字符串或非字符串常量
+- `tooShort`：字符串长度小于 minLength，因此未加密
 
 ## 加密方式
 

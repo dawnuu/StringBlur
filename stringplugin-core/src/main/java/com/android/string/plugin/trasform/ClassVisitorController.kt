@@ -20,7 +20,8 @@ class ClassVisitorController(
     private val key: String,
     private val useBytes: Boolean,
     private val stringBlurWrapper: IString,
-    private val reportPath: String
+    private val reportPath: String,
+    private val minLength: Int
 ) {
     private val stringBlurClassName =
         Constant.PLUGIN_CLASS_FILE_PATH.format(applicationId).replace(".", "/")
@@ -82,7 +83,9 @@ class ClassVisitorController(
     }
 
 
-    fun overflow(data: String?) = stringBlurWrapper.overflow(data?.toByteArray())
+    fun overflow(data: String?): Boolean {
+        return data != null && stringBlurWrapper.overflow(data.toByteArray()) && data.length >= minLength
+    }
 
     fun reportEncrypted(methodName: String?, data: String?) {
         StringBlurReport.encrypted(reportPath, currentClassName, methodName, data)
@@ -93,8 +96,10 @@ class ClassVisitorController(
     }
 
     fun reportIgnoredLdc(methodName: String?, value: Any?) {
-        if (value is String && !overflow(value)) {
+        if (value is String && !stringBlurWrapper.overflow(value.toByteArray())) {
             reportIgnored(methodName, value, "emptyString")
+        } else if (value is String && value.length < minLength) {
+            reportIgnored(methodName, value, "tooShort")
         } else if (value !is String) {
             reportIgnored(methodName, value, "notStringLdc")
         }

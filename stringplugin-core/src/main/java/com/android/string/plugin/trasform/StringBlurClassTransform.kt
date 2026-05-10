@@ -51,7 +51,8 @@ abstract class StringBlurClassTransform :
                 useBytes.get(),
                 applicationId.get(),
                 StringBlurWrapper(mode.get()),
-                reportPath.get()
+                reportPath.get(),
+                minLength.get()
             )
         }
     }
