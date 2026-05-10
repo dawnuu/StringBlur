@@ -46,16 +46,22 @@ class ClinitMethodVisitor(mv: MethodVisitor, private val controller: ClassVisito
         name: String?,
         descriptor: String?
     ) {
-        if (controller.currentClassName == owner && temp != null) {
+        if (opcode == Opcodes.PUTSTATIC &&
+            descriptor == StringFiled.DESC &&
+            controller.currentClassName == owner &&
+            temp != null
+        ) {
             run End@{
                 controller.staticFields.forEach {
                     if (it.name == name) {
+                        temp = null
                         return@End
                     }
                 }
                 controller.staticFinalFields.forEach {
                     if (it.name == name && it.value.isNullOrBlank()) {
                         it.value = temp
+                        temp = null
                         return@End
                     }
                 }

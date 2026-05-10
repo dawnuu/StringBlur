@@ -52,7 +52,7 @@ class StringBlurClassVisitor(
         signature: String?,
         value: Any?
     ): FieldVisitor {
-        controller.visitField(access, name, descriptor, value.toString())
+        controller.visitField(access, name, descriptor, value as? String)
         return super.visitField(access, name, descriptor, signature, value)
     }
 
