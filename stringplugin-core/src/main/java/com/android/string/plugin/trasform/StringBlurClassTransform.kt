@@ -48,7 +48,7 @@ abstract class StringBlurClassTransform :
             StringBlurClassVisitor(
                 nextClassVisitor,
                 key.get(),
-                useBytes.get(),
+                bytesMode.get(),
                 applicationId.get(),
                 modes.get(),
                 reportPath.get(),

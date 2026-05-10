@@ -47,7 +47,7 @@ class StringBlurPlugin : Plugin<Project> {
                 reportPath.get(),
                 variant.name,
                 modes.joinToString(",") { it.name },
-                stringblur.useBytes
+                stringblur.bytesMode.name
             )
 
             variant.instrumentation.transformClassesWith(

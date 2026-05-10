@@ -1,5 +1,6 @@
 package com.android.string.plugin
 
+import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 
 /**
@@ -8,10 +9,10 @@ import com.android.string.plugin.mode.Mode
  **/
 abstract class StringBlurExtension {
     var key: Any? = null
-    var useBytes: Boolean = false
     var enable: Boolean = false
     var whiteList: List<String> = emptyList()
     var encodePackages: List<String>? = emptyList()
     var modes: List<Mode> = listOf(Mode.DEFAULT)
+    var bytesMode: BytesMode = BytesMode.STRING
     var minLength: Int = 0
 }

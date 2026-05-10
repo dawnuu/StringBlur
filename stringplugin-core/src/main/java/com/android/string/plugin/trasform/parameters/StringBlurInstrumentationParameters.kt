@@ -3,6 +3,7 @@ package com.android.string.plugin.trasform.parameters
 import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.string.plugin.StringBlurExtension
 import com.android.string.plugin.data.Constant
+import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.util.ModeUtils
 import com.android.string.plugin.util.generator.Generator
@@ -20,7 +21,7 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     abstract val key: Property<String>
 
     @get:Input
-    abstract val useBytes: Property<Boolean>
+    abstract val bytesMode: Property<BytesMode>
 
     @get:Input
     abstract val applicationId: Property<String>
@@ -52,7 +53,7 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
         modes: List<Mode>
     ) {
         this.key.set(generator.generate())
-        this.useBytes.set(extension.useBytes)
+        this.bytesMode.set(extension.bytesMode)
         this.applicationId.set(applicationId)
         this.modes.addAll(modes)
         this.minLength.set(extension.minLength.coerceAtLeast(0))

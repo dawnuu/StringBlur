@@ -2,6 +2,7 @@ package com.android.string.plugin.trasform
 
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.field.StringFiled
+import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
@@ -20,7 +21,7 @@ import kotlin.random.Random
 class ClassVisitorController(
     applicationId: String,
     private val key: String,
-    private val useBytes: Boolean,
+    private val bytesMode: BytesMode,
     private val modes: List<Mode>,
     private val reportPath: String,
     private val minLength: Int
@@ -90,8 +91,8 @@ class ClassVisitorController(
         return data != null && ModeUtils.getEncodeImpl(modes.first()).overflow(data.toByteArray()) && data.length >= minLength
     }
 
-    fun reportEncrypted(methodName: String?, data: String?, mode: Mode) {
-        StringBlurReport.encrypted(reportPath, currentClassName, methodName, data, mode.name)
+    fun reportEncrypted(methodName: String?, data: String?, mode: Mode, selectedBytesMode: BytesMode) {
+        StringBlurReport.encrypted(reportPath, currentClassName, methodName, data, mode.name, selectedBytesMode.name)
     }
 
     fun reportIgnored(methodName: String?, value: Any?, reason: String) {
@@ -111,12 +112,21 @@ class ClassVisitorController(
     fun write(data: String?, mv: MethodVisitor, methodName: String? = null) {
         val modeIndex = selectModeIndex()
         val mode = modes[modeIndex]
+        val selectedBytesMode = selectBytesMode()
         val stringBlurWrapper = ModeUtils.getEncodeImpl(mode)
-        reportEncrypted(methodName, data, mode)
-        if (useBytes) {
+        reportEncrypted(methodName, data, mode, selectedBytesMode)
+        if (selectedBytesMode == BytesMode.BYTES) {
             writeByBytes(data, stringBlurWrapper, modeIndex, mv)
         } else {
             writeByString(data, stringBlurWrapper, modeIndex, mv)
+        }
+    }
+
+    private fun selectBytesMode(): BytesMode {
+        return when (bytesMode) {
+            BytesMode.STRING -> BytesMode.STRING
+            BytesMode.BYTES -> BytesMode.BYTES
+            BytesMode.RANDOM -> if (random.nextBoolean()) BytesMode.BYTES else BytesMode.STRING
         }
     }
 

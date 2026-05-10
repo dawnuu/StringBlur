@@ -6,7 +6,7 @@ object StringBlurReport {
     private val lock = Any()
     private val stats = mutableMapOf<String, Stats>()
 
-    fun init(reportPath: String, variantName: String, mode: String, useBytes: Boolean) {
+    fun init(reportPath: String, variantName: String, mode: String, bytesMode: String) {
         synchronized(lock) {
             val file = File(reportPath)
             file.parentFile?.mkdirs()
@@ -15,7 +15,7 @@ object StringBlurReport {
                 "StringBlur Report\n" +
                         "Variant: $variantName\n" +
                         "Mode: $mode\n" +
-                        "UseBytes: $useBytes\n\n" +
+                        "BytesMode: $bytesMode\n\n" +
                         "Summary:\n" +
                         "Classes scanned: 0\n" +
                         "Classes skipped: 0\n" +
@@ -36,11 +36,11 @@ object StringBlurReport {
         append(reportPath, "SKIP class=$className reason=$reason")
     }
 
-    fun encrypted(reportPath: String, className: String?, methodName: String?, value: String?, mode: String) {
+    fun encrypted(reportPath: String, className: String?, methodName: String?, value: String?, mode: String, bytesMode: String) {
         update(reportPath) { it.stringsEncrypted++ }
         append(
             reportPath,
-            "ENCRYPT class=${className.orEmpty()} method=${methodName.orEmpty()} mode=$mode value=${sanitize(value)}"
+            "ENCRYPT class=${className.orEmpty()} method=${methodName.orEmpty()} mode=$mode bytesMode=$bytesMode value=${sanitize(value)}"
         )
     }
 

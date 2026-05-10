@@ -1,6 +1,7 @@
 package com.android.string.plugin.trasform
 
 import com.android.string.plugin.mode.Mode
+import com.android.string.plugin.mode.BytesMode
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
@@ -13,13 +14,13 @@ import org.objectweb.asm.Opcodes
 class StringBlurClassVisitor(
     cv: ClassVisitor,
     key: String,
-    useBytes: Boolean,
+    bytesMode: BytesMode,
     applicationId: String,
     modes: List<Mode>,
     reportPath: String,
     minLength: Int,
 ) : ClassVisitor(Opcodes.ASM9, cv) {
-    private val controller = ClassVisitorController(applicationId, key, useBytes, modes, reportPath, minLength)
+    private val controller = ClassVisitorController(applicationId, key, bytesMode, modes, reportPath, minLength)
     override fun visit(
         version: Int,
         access: Int,
