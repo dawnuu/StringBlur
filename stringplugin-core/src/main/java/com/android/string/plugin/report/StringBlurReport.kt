@@ -36,11 +36,11 @@ object StringBlurReport {
         append(reportPath, "SKIP class=$className reason=$reason")
     }
 
-    fun encrypted(reportPath: String, className: String?, methodName: String?, value: String?) {
+    fun encrypted(reportPath: String, className: String?, methodName: String?, value: String?, mode: String) {
         update(reportPath) { it.stringsEncrypted++ }
         append(
             reportPath,
-            "ENCRYPT class=${className.orEmpty()} method=${methodName.orEmpty()} value=${sanitize(value)}"
+            "ENCRYPT class=${className.orEmpty()} method=${methodName.orEmpty()} mode=$mode value=${sanitize(value)}"
         )
     }
 

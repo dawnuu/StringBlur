@@ -9,6 +9,7 @@ import com.android.string.plugin.util.ModeUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
@@ -33,9 +34,11 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
         if (!path.exists()) {
             path.mkdirs()
         }
-        val mode = mode.get()
-        ModeUtils.getEncodeImplFile(mode).create(path, applicationId.get(), mode)
-        StringBlurFile().create(path, applicationId.get(), mode)
+        val modes = modes.get()
+        modes.forEach { mode ->
+            ModeUtils.getEncodeImplFile(mode).create(path, applicationId.get(), mode)
+        }
+        StringBlurFile().create(path, applicationId.get(), modes)
     }
 
     @get:Input
@@ -45,20 +48,20 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
     abstract val dir: DirectoryProperty
 
     @get:Input
-    abstract val mode: Property<Mode>
+    abstract val modes: ListProperty<Mode>
 
     companion object {
         fun execute(
             project: Project,
             variant: Variant,
             applicationId: Provider<String>,
-            mode: Mode
+            modes: List<Mode>
         ) {
             val name = variant.name.capitalized()
             val taskName = "generate${Constant.PLUGIN_CLASS_NAME}$name"
             val provider = project.tasks.register(taskName, StringBlurTask::class.java) {
                 it.applicationId.set(applicationId)
-                it.mode.set(mode)
+                it.modes.addAll(modes)
             }
             variant.sources.java?.addGeneratedSourceDirectory(provider, StringBlurTask::dir)
         }

@@ -9,6 +9,7 @@ import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.task.StringBlurTask
 import com.android.string.plugin.trasform.StringBlurClassTransform
 import com.android.string.plugin.util.Logger
+import com.android.string.plugin.util.ModeUtils
 import com.android.string.plugin.util.generator.KeyGenerator
 import com.android.string.plugin.util.generator.RandomGenerator
 import org.gradle.api.GradleException
@@ -37,6 +38,7 @@ class StringBlurPlugin : Plugin<Project> {
 
             // 使用 Provider 避免配置阶段 namespace 未就绪的问题
             val applicationId = variant.namespace
+            val modes = ModeUtils.resolveModes(stringblur.modes)
             val reportPath = target.layout.buildDirectory
                 .file("reports/${Constant.PLUGIN_NAME}/${variant.name}.txt")
                 .map { it.asFile.absolutePath }
@@ -44,7 +46,7 @@ class StringBlurPlugin : Plugin<Project> {
             StringBlurReport.init(
                 reportPath.get(),
                 variant.name,
-                stringblur.mode.name,
+                modes.joinToString(",") { it.name },
                 stringblur.useBytes
             )
 
@@ -52,7 +54,7 @@ class StringBlurPlugin : Plugin<Project> {
                 StringBlurClassTransform::class.java,
                 InstrumentationScope.ALL
             ) { params ->
-                params.setParams(generator, applicationId, stringblur, variant.name, reportPath)
+                params.setParams(generator, applicationId, stringblur, variant.name, reportPath, modes)
             }
 
             variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES)
@@ -61,7 +63,7 @@ class StringBlurPlugin : Plugin<Project> {
                 target,
                 variant,
                 applicationId,
-                stringblur.mode
+                modes
             )
         }
 

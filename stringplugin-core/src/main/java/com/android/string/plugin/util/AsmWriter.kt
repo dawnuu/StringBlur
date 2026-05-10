@@ -11,25 +11,35 @@ import org.objectweb.asm.Type
 class AsmWriter(private val className: String) {
 
     fun write(data: String, key: String, mv: MethodVisitor) {
+        write(data, key, 0, mv)
+    }
+
+    fun write(data: String, key: String, modeIndex: Int, mv: MethodVisitor) {
         mv.visitLdcInsn(data)
         mv.visitLdcInsn(key)
+        write(modeIndex, mv)
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC,
             className,
             "decrypt",
-            "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+            "(Ljava/lang/String;Ljava/lang/String;I)Ljava/lang/String;",
             false
         )
     }
 
     fun write(data: ByteArray, key: String, mv: MethodVisitor) {
+        write(data, key, 0, mv)
+    }
+
+    fun write(data: ByteArray, key: String, modeIndex: Int, mv: MethodVisitor) {
         write(data, mv)
         write(key.toByteArray(), mv)
+        write(modeIndex, mv)
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC,
             className,
             "decrypt",
-            "([B[B)Ljava/lang/String;",
+            "([B[BI)Ljava/lang/String;",
             false
         )
     }

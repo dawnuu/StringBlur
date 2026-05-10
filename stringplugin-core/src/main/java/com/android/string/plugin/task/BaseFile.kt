@@ -18,6 +18,13 @@ abstract class BaseFile {
         }
     }
 
+    open fun create(path: File, applicationId: String, modes: List<Mode>) {
+        val file = File(path, getFileName(applicationId))
+        JavaWriter(FileWriter(file)).use {
+            write(it, applicationId, modes.first())
+        }
+    }
+
     abstract fun write(writer: JavaWriter, applicationId: String, mode: Mode)
 
     abstract fun getFileName(applicationId: String): String

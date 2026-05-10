@@ -32,7 +32,7 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     abstract val whiteList: ListProperty<String>
 
     @get:Input
-    abstract val mode: Property<Mode>
+    abstract val modes: ListProperty<Mode>
 
     @get:Input
     abstract val minLength: Property<Int>
@@ -48,12 +48,13 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
         applicationId: Provider<String>,
         extension: StringBlurExtension,
         variantName: String,
-        reportPath: Provider<String>
+        reportPath: Provider<String>,
+        modes: List<Mode>
     ) {
         this.key.set(generator.generate())
         this.useBytes.set(extension.useBytes)
         this.applicationId.set(applicationId)
-        this.mode.set(extension.mode)
+        this.modes.addAll(modes)
         this.minLength.set(extension.minLength.coerceAtLeast(0))
         this.variantName.set(variantName)
         this.reportPath.set(reportPath)
@@ -65,7 +66,9 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
         this.whiteList.add("IString")
         this.whiteList.add(Constant.DEFAULT_IMPL_CLASS_NAME)
         this.whiteList.add(applicationId.map { Constant.PLUGIN_CLASS_PACKAGE.format(it) })
-        this.whiteList.add(applicationId.map { ModeUtils.getEncodeImplClassFilePath(extension.mode, it) })
+        modes.forEach { mode ->
+            this.whiteList.add(applicationId.map { ModeUtils.getEncodeImplClassFilePath(mode, it) })
+        }
 
         if (extension.encodePackages != null) {
             this.encodePackages.add(applicationId)

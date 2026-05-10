@@ -1,15 +1,17 @@
 package com.android.string.plugin.trasform
 
-import com.android.string.plugin.IString
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.field.StringFiled
+import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
 import com.android.string.plugin.trasform.visitor.InitMethodVisitor
 import com.android.string.plugin.trasform.visitor.NormalMethodVisitor
 import com.android.string.plugin.util.AsmWriter
+import com.android.string.plugin.util.ModeUtils
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import kotlin.random.Random
 
 /**
  * @author chancey
@@ -19,7 +21,7 @@ class ClassVisitorController(
     applicationId: String,
     private val key: String,
     private val useBytes: Boolean,
-    private val stringBlurWrapper: IString,
+    private val modes: List<Mode>,
     private val reportPath: String,
     private val minLength: Int
 ) {
@@ -31,6 +33,7 @@ class ClassVisitorController(
     val finalFields = mutableListOf<StringFiled>()
     private val fields = mutableListOf<StringFiled>()
     private var isClInitExists = false
+    private val random = Random(key.hashCode())
     fun visitField(access: Int, name: String?, desc: String?, value: String?) {
         if (name.isNullOrBlank() || desc != StringFiled.DESC) {
             return
@@ -84,11 +87,11 @@ class ClassVisitorController(
 
 
     fun overflow(data: String?): Boolean {
-        return data != null && stringBlurWrapper.overflow(data.toByteArray()) && data.length >= minLength
+        return data != null && ModeUtils.getEncodeImpl(modes.first()).overflow(data.toByteArray()) && data.length >= minLength
     }
 
-    fun reportEncrypted(methodName: String?, data: String?) {
-        StringBlurReport.encrypted(reportPath, currentClassName, methodName, data)
+    fun reportEncrypted(methodName: String?, data: String?, mode: Mode) {
+        StringBlurReport.encrypted(reportPath, currentClassName, methodName, data, mode.name)
     }
 
     fun reportIgnored(methodName: String?, value: Any?, reason: String) {
@@ -96,7 +99,7 @@ class ClassVisitorController(
     }
 
     fun reportIgnoredLdc(methodName: String?, value: Any?) {
-        if (value is String && !stringBlurWrapper.overflow(value.toByteArray())) {
+        if (value is String && !ModeUtils.getEncodeImpl(modes.first()).overflow(value.toByteArray())) {
             reportIgnored(methodName, value, "emptyString")
         } else if (value is String && value.length < minLength) {
             reportIgnored(methodName, value, "tooShort")
@@ -106,21 +109,31 @@ class ClassVisitorController(
     }
 
     fun write(data: String?, mv: MethodVisitor, methodName: String? = null) {
-        reportEncrypted(methodName, data)
+        val modeIndex = selectModeIndex()
+        val mode = modes[modeIndex]
+        val stringBlurWrapper = ModeUtils.getEncodeImpl(mode)
+        reportEncrypted(methodName, data, mode)
         if (useBytes) {
-            writeByBytes(data, mv)
+            writeByBytes(data, stringBlurWrapper, modeIndex, mv)
         } else {
-            writeByString(data, mv)
+            writeByString(data, stringBlurWrapper, modeIndex, mv)
         }
     }
 
-    private fun writeByString(data: String?, mv: MethodVisitor) {
-        val encodeText = stringBlurWrapper.encryptString(data, key)
-        AsmWriter(stringBlurClassName).write(encodeText, key, mv)
+    private fun selectModeIndex(): Int {
+        if (modes.size == 1) {
+            return 0
+        }
+        return random.nextInt(modes.size)
     }
 
-    private fun writeByBytes(data: String?, mv: MethodVisitor) {
+    private fun writeByString(data: String?, stringBlurWrapper: com.android.string.plugin.IString, modeIndex: Int, mv: MethodVisitor) {
+        val encodeText = stringBlurWrapper.encryptString(data, key)
+        AsmWriter(stringBlurClassName).write(encodeText, key, modeIndex, mv)
+    }
+
+    private fun writeByBytes(data: String?, stringBlurWrapper: com.android.string.plugin.IString, modeIndex: Int, mv: MethodVisitor) {
         val encodeText = stringBlurWrapper.encryptBytes(data, key)
-        AsmWriter(stringBlurClassName).write(encodeText, key, mv)
+        AsmWriter(stringBlurClassName).write(encodeText, key, modeIndex, mv)
     }
 }

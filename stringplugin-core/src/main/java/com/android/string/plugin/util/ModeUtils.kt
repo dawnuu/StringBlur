@@ -21,6 +21,10 @@ import com.android.string.plugin.task.build.XorEncodeImplFile
  **/
 object ModeUtils {
 
+    fun resolveModes(modes: List<Mode>): List<Mode> {
+        return modes.ifEmpty { listOf(Mode.DEFAULT) }.distinct()
+    }
+
     fun getEncodeImplClassName(mode: Mode): String {
         return when (mode) {
             Mode.DEFAULT -> Constant.DEFAULT_IMPL_CLASS_NAME
@@ -49,6 +53,10 @@ object ModeUtils {
             Mode.SHIFT -> ShiftEncodeImpl()
             Mode.XOR_SHIFT -> XorShiftEncodeImpl()
         }
+    }
+
+    fun getEncodeImpl(modeName: String): IString {
+        return getEncodeImpl(Mode.valueOf(modeName))
     }
 
     fun getEncodeImplFile(mode: Mode): BaseFile {
