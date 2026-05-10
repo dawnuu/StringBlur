@@ -1,7 +1,11 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
+    id 'java-gradle-plugin'
     id 'maven-publish'
 }
+
+group = 'com.android.string.plugin'
+version = VERSION
 
 dependencies {
     implementation gradleApi()
@@ -12,19 +16,22 @@ dependencies {
     implementation project(":stringplugin-common")
 }
 
-javaToolchains {
-    version JavaVersion.VERSION_21
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+gradlePlugin {
+    plugins {
+        stringblur {
+            id = 'stringblur'
+            implementationClass = 'com.android.string.plugin.StringBlurPlugin'
+        }
+    }
 }
 
 publishing {
-    publications {
-        StringBlurPlugin(MavenPublication) {
-            from components.java
-            groupId "com.android.string.plugin"
-            artifactId "stringblur"
-            version VERSION
-        }
-    }
     repositories {
 //        maven {
 //            url System.getenv("MAVEN_URL")
@@ -37,5 +44,11 @@ publishing {
         maven {
             url '../../../maven/gradle'
         }
+    }
+}
+
+afterEvaluate {
+    publishing.publications.named('pluginMaven') {
+        artifactId = 'stringblur'
     }
 }
