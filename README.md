@@ -13,7 +13,7 @@ StringBlur 是一个 Android Gradle 插件，用于在构建阶段对 class 中�
 ```groovy
 pluginManagement {
     repositories {
-        maven { url uri('/Users/dawn/Projects/maven/gradle') }
+        maven { url "https://raw.githubusercontent.com/dawnuu/maven/refs/heads/main/gradle/"}
         google()
         mavenCentral()
         gradlePluginPortal()
@@ -51,7 +51,7 @@ plugins {
 ```groovy
 buildscript {
     repositories {
-        maven { url uri('/Users/dawn/Projects/maven/gradle') }
+        maven { url "https://raw.githubusercontent.com/dawnuu/maven/refs/heads/main/gradle/"}
         google()
         mavenCentral()
     }
