@@ -125,6 +125,58 @@ stringblur {
 build/reports/stringblur/{variant}.txt
 ```
 
+报告内容包括：
+- 📊 **执行统计**：扫描类数量、加密字符串数量、跳过数量
+- ⏱️ **性能分析**：执行时间、加密速率、性能评级
+- 📈 **算法分布**：各加密算法使用占比和数量
+- 📏 **长度分布**：按字符串长度分类的统计
+- 🎯 **优化建议**：基于统计数据的性能建议
+
+### 📄 **报告示例**
+
+```text
+StringBlur Performance Report
+Generated: 2026-06-19 14:30:25
+Variant: release
+Config: XOR_SIMD,FAST_ROT,REVERSE (STRING mode)
+========================================
+
+Events:
+SCAN class=com/example/MainActivity
+ENCRYPT class=com/example/MainActivity method=initString mode=XOR_SIMD bytesMode=STRING length=12
+SCAN class=com/example/ApiService  
+ENCRYPT class=com/example/ApiService method=getToken mode=FAST_ROT bytesMode=STRING length=24
+
+========================================
+PERFORMANCE SUMMARY
+========================================
+Execution Time: 1,245ms
+
+Overall Statistics:
+  Classes Scanned: 156
+  Classes Skipped: 12
+  Strings Encrypted: 892
+  Strings Ignored: 342
+
+Algorithm Distribution:
+  XOR_SIMD: 312 strings (35%)
+  FAST_ROT: 223 strings (25%)
+  REVERSE: 178 strings (20%)
+  XOR_SHIFT: 134 strings (15%)
+  XOR: 45 strings (5%)
+
+String Length Distribution:
+  1-8 chars: 156 strings
+  9-20 chars: 234 strings
+  21-50 chars: 298 strings
+  51-100 chars: 156 strings
+  101-200 chars: 48 strings
+
+Performance Assessment:
+  ⭐⭐⭐⭐⭐ Very Fast (<1s)
+  Encryption Rate: 716 strings/sec
+```
+
 ## 智能算法选择（可选功能）
 
 StringBlur 支持智能算法选择策略，可以根据字符串特征自动选择最佳加密算法：
