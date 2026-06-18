@@ -69,25 +69,132 @@ apply plugin: 'stringblur'
 
 ## 配置
 
+### Groovy DSL (build.gradle)
+
 ```groovy
 import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
+import com.android.string.plugin.mode.SelectionStrategy
 
 stringblur {
-    key 'Hello World'
-    enable true
+    key = "Hello World"
+    enable = true
 
     whiteList = ['com.xxx.xxx.BuildConfig']
     encodePackages = ['com.xxx.xxx']
 
     modes = [Mode.XOR, Mode.SHIFT, Mode.XOR_SHIFT]
     bytesMode = BytesMode.STRING
-    minLength 3
-    enableWhenDebug false
+    minLength = 3
+    enableWhenDebug = false
+
+    // 智能算法选择
+    selectionStrategy = SelectionStrategy.SMART
+    performanceWeight = 0.6
+    securityWeight = 0.4
+    
+    // 增量编译
+    incremental = true
+    cacheDir = file("build/string-blur-cache")
 }
 ```
 
-## 配置项
+### Kotlin DSL (build.gradle.kts)
+
+```kotlin
+import com.android.string.plugin.mode.BytesMode
+import com.android.string.plugin.mode.Mode
+import com.android.string.plugin.mode.SelectionStrategy
+
+stringblur {
+    key = "Hello World"
+    enable = true
+
+    whiteList = listOf("com.xxx.xxx.BuildConfig")
+    encodePackages = listOf("com.xxx.xxx")
+
+    modes = listOf(Mode.XOR, Mode.SHIFT, Mode.XOR_SHIFT)
+    bytesMode = BytesMode.STRING
+    minLength = 3
+    enableWhenDebug = false
+    
+    // 智能算法选择
+    selectionStrategy = SelectionStrategy.SMART
+    performanceWeight = 0.6
+    securityWeight = 0.4
+    
+    // 增量编译
+    incremental = true
+    cacheDir = file("build/string-blur-cache")
+}
+```
+
+### 现代Kotlin DSL完整配置示例
+
+```kotlin
+// build.gradle.kts
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.stringblur)
+}
+
+android {
+    // ... android配置
+}
+
+stringblur {
+    enable = true
+    key = "my-project-key-2024"
+    minLength = 3
+    enableWhenDebug = false
+    
+    // 加密算法配置
+    modes = listOf(
+        Mode.XOR_SIMD,    // SIMD优化的批量XOR
+        Mode.FAST_ROT,    // 快速位旋转算法
+        Mode.REVERSE      // 字节反转
+    )
+    bytesMode = BytesMode.RANDOM
+    
+    // 智能算法选择配置
+    selectionStrategy = SelectionStrategy.SMART
+    performanceWeight = 0.7  // 70%性能权重
+    securityWeight = 0.3     // 30%安全权重
+    
+    // 增量编译配置
+    incremental = true
+    cacheDir = file("build/string-blur-cache")
+    
+    // 白名单配置
+    whiteList = listOf(
+        "BuildConfig",
+        "R",
+        "R2",
+        "com.android.string.plugin"
+    )
+}
+```
+
+## 配置项对照表
+
+### Groovy DSL vs Kotlin DSL
+
+| 配置项 | Groovy DSL | Kotlin DSL |
+|-------|-----------|-----------|
+| 加密密钥 | `key = "string"` | `key = "string"` |
+| 启用插件 | `enable = true` | `enable = true` |
+| 加密算法 | `modes = [Mode.XOR]` | `modes = listOf(Mode.XOR)` |
+| Bytes模式 | `bytesMode = BytesMode.STRING` | `bytesMode = BytesMode.STRING` |
+| 最小长度 | `minLength = 3` | `minLength = 3` |
+| Debug模式 | `enableWhenDebug = false` | `enableWhenDebug = false` |
+| 选择策略 | `selectionStrategy = SelectionStrategy.SMART` | `selectionStrategy = SelectionStrategy.SMART` |
+| 性能权重 | `performanceWeight = 0.6` | `performanceWeight = 0.6` |
+| 安全权重 | `securityWeight = 0.4` | `securityWeight = 0.4` |
+| 增量编译 | `incremental = true` | `incremental = true` |
+| 缓存目录 | `cacheDir = file("xxx")` | `cacheDir = file("xxx")` |
+| 白名单 | `whiteList = ["xxx"]` | `whiteList = listOf("xxx")` |
+
+### 详细说明
 
 - `key`：加密密钥。支持字符串，也支持整数随机长度，例如 `key 16`。
 - `enable`：是否开启字符串加密，默认 `false`。
@@ -100,6 +207,8 @@ stringblur {
 - `selectionStrategy`：算法选择策略，默认 `SelectionStrategy.RANDOM` 保持原有随机行为。可设置为 `SMART` 启用智能选择。
 - `performanceWeight`：性能权重 (0.0-1.0)，仅在 `SelectionStrategy.SMART` 时生效，默认 `0.5`。
 - `securityWeight`：安全权重 (0.0-1.0)，仅在 `SelectionStrategy.SMART` 时生效，默认 `0.5`。
+- `incremental`：启用增量编译优化，默认 `true`。开启后只处理变更的文件和字符串。
+- `cacheDir`：缓存目录，默认使用 `build/string-blur-cache`。
 
 ## 加密方式
 
