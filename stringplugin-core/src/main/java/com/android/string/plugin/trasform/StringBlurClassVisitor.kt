@@ -18,7 +18,7 @@ class StringBlurClassVisitor(
     bytesMode: BytesMode,
     applicationId: String,
     modes: List<Mode>,
-    reportPath: String,
+    reportPath: String?,
     minLength: Int,
     selectionStrategy: SelectionStrategy,
     performanceWeight: Double,

@@ -3,39 +3,27 @@ package com.android.string.plugin.trasform
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
-import com.android.string.plugin.report.StringBlurReport
+import com.android.string.plugin.data.Constant
 import com.android.string.plugin.trasform.parameters.StringBlurInstrumentationParameters
-import com.android.string.plugin.wrapper.StringBlurWrapper
 import org.objectweb.asm.ClassVisitor
 
-/**
- * @author chancey
- * @date   2023/9/5   20:36
- **/
 abstract class StringBlurClassTransform :
     AsmClassVisitorFactory<StringBlurInstrumentationParameters> {
 
     override fun isInstrumentable(classData: ClassData): Boolean {
         val className = classData.className
         val params = parameters.get()
-        val reportPath = params.reportPath.get()
         val whiteList = params.whiteList.get()
-        StringBlurReport.scanned(reportPath, className)
-        
+
         val isInWhiteList = whiteList.any { whiteEntry ->
             className.endsWith(whiteEntry) || className.startsWith(whiteEntry)
         }
-        
+
         if (isInWhiteList) {
-            StringBlurReport.skipped(reportPath, className, "whiteList")
             return false
         }
 
-        val isInEncodePackages = isInEncodePackages(className)
-        if (!isInEncodePackages) {
-            StringBlurReport.skipped(reportPath, className, "encodePackages")
-        }
-        return isInEncodePackages
+        return isInEncodePackages(className)
     }
 
     override fun createClassVisitor(
@@ -49,7 +37,7 @@ abstract class StringBlurClassTransform :
                 bytesMode.get(),
                 applicationId.get(),
                 modes.get(),
-                reportPath.get(),
+                reportPath.orNull,
                 minLength.get(),
                 selectionStrategy.get(),
                 performanceWeight.get(),

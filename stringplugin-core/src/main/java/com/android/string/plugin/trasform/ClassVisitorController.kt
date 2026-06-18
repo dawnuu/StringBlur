@@ -25,7 +25,7 @@ class ClassVisitorController(
     private val key: String,
     private val bytesMode: BytesMode,
     private val modes: List<Mode>,
-    private val reportPath: String,
+    private val reportPath: String?,
     private val minLength: Int,
     private val selectionStrategy: SelectionStrategy = SelectionStrategy.RANDOM,
     private val performanceWeight: Double = 0.5,
@@ -98,11 +98,11 @@ class ClassVisitorController(
     }
 
     fun reportEncrypted(methodName: String?, data: String?, mode: Mode, selectedBytesMode: BytesMode) {
-        StringBlurReport.encrypted(reportPath, currentClassName, methodName, data, mode.name, selectedBytesMode.name)
+        reportPath?.let { StringBlurReport.encrypted(it, currentClassName, methodName, data, mode.name, selectedBytesMode.name) }
     }
 
     fun reportIgnored(methodName: String?, value: Any?, reason: String) {
-        StringBlurReport.ignored(reportPath, currentClassName, methodName, value, reason)
+        reportPath?.let { StringBlurReport.ignored(it, currentClassName, methodName, value, reason) }
     }
 
     fun reportIgnoredLdc(methodName: String?, value: Any?) {
