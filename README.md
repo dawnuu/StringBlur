@@ -97,6 +97,9 @@ stringblur {
 - `bytesMode`：密文承载方式，默认 `BytesMode.STRING`。
 - `minLength`：最小加密长度，长度小于该值的字符串会跳过，默认 `0`。
 - `enableWhenDebug`：debug构建时是否启用加密，默认 `false`。设置为 `true` 时debug构建也会执行加密。
+- `selectionStrategy`：算法选择策略，默认 `SelectionStrategy.RANDOM` 保持原有随机行为。可设置为 `SMART` 启用智能选择。
+- `performanceWeight`：性能权重 (0.0-1.0)，仅在 `SelectionStrategy.SMART` 时生效，默认 `0.5`。
+- `securityWeight`：安全权重 (0.0-1.0)，仅在 `SelectionStrategy.SMART` 时生效，默认 `0.5`。
 
 ## 加密方式
 
@@ -121,6 +124,52 @@ stringblur {
 ```text
 build/reports/stringblur/{variant}.txt
 ```
+
+## 智能算法选择（可选功能）
+
+StringBlur 支持智能算法选择策略，可以根据字符串特征自动选择最佳加密算法：
+
+### 选择策略
+
+- `SelectionStrategy.RANDOM`：**默认**，完全随机选择（保持现有行为）
+- `SelectionStrategy.SMART`：智能选择，基于字符串长度、内容敏感度和特征
+- `SelectionStrategy.PERFORMANCE`：性能优先，选择最快的算法
+- `SelectionStrategy.SECURITY`：安全优先，选择最安全的算法
+
+### 智能选择示例
+
+```groovy
+stringblur {
+    key 'Hello World'
+    enable true
+    
+    // 基础配置：保持现有随机行为
+    modes = [Mode.XOR, Mode.SHIFT, Mode.XOR_SHIFT]
+    
+    // 启用智能选择（可选）
+    selectionStrategy = SelectionStrategy.SMART
+    performanceWeight = 0.7  // 偏重性能
+    securityWeight = 0.3     // 兼顾安全
+}
+```
+
+### 智能选择规则
+
+| 字符串特征 | 选择算法 | 说明 |
+|------------|----------|------|
+| 短字符串 (1-8字符) | FAST_ROT | 位旋转最快 |
+| 中等长度 (9-50字符) | XOR_SIMD | SIMD批量处理 |
+| 长字符串 (>200字符) | REVERSE | 内存操作最快 |
+| 包含敏感词 | XOR_SHIFT | 安全性最高 |
+| 数字为主 | FAST_ROT | 适合数字特征 |
+| 二进制数据 | XOR_SIMD | 高效处理 |
+
+### 使用建议
+
+1. **保持现状**：不设置 `selectionStrategy` 即可保持现有随机行为
+2. **性能优化**：设置 `selectionStrategy = SelectionStrategy.PERFORMANCE`
+3. **安全优先**：设置 `selectionStrategy = SelectionStrategy.SECURITY`
+4. **平衡选择**：设置 `selectionStrategy = SelectionStrategy.SMART` 并调整权重
 
 报告事件包括：
 

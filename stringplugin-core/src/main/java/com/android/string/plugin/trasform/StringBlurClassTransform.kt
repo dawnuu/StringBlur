@@ -50,7 +50,10 @@ abstract class StringBlurClassTransform :
                 applicationId.get(),
                 modes.get(),
                 reportPath.get(),
-                minLength.get()
+                minLength.get(),
+                selectionStrategy.get(),
+                performanceWeight.get(),
+                securityWeight.get()
             )
         }
     }

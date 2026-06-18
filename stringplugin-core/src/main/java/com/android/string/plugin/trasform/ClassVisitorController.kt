@@ -10,6 +10,8 @@ import com.android.string.plugin.trasform.visitor.InitMethodVisitor
 import com.android.string.plugin.trasform.visitor.NormalMethodVisitor
 import com.android.string.plugin.util.AsmWriter
 import com.android.string.plugin.util.ModeUtils
+import com.android.string.plugin.util.SmartAlgorithmSelector
+import com.android.string.plugin.mode.SelectionStrategy
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import kotlin.random.Random
@@ -24,8 +26,12 @@ class ClassVisitorController(
     private val bytesMode: BytesMode,
     private val modes: List<Mode>,
     private val reportPath: String,
-    private val minLength: Int
+    private val minLength: Int,
+    private val selectionStrategy: SelectionStrategy = SelectionStrategy.RANDOM,
+    private val performanceWeight: Double = 0.5,
+    private val securityWeight: Double = 0.5
 ) {
+    private val smartSelector = SmartAlgorithmSelector()
     private val stringBlurClassName =
         Constant.PLUGIN_CLASS_FILE_PATH.format(applicationId).replace(".", "/")
     var currentClassName: String? = null
@@ -110,7 +116,7 @@ class ClassVisitorController(
     }
 
     fun write(data: String?, mv: MethodVisitor, methodName: String? = null) {
-        val modeIndex = selectModeIndex()
+        val modeIndex = selectModeIndex(data ?: "")
         val mode = modes[modeIndex]
         val selectedBytesMode = selectBytesMode()
         val stringBlurWrapper = ModeUtils.getEncodeImpl(mode)
@@ -130,11 +136,21 @@ class ClassVisitorController(
         }
     }
 
-    private fun selectModeIndex(): Int {
+    private fun selectModeIndex(content: String): Int {
         if (modes.size == 1) {
             return 0
         }
-        return random.nextInt(modes.size)
+        
+        // 使用智能选择器选择最佳算法
+        val selectedMode = smartSelector.selectBestAlgorithm(
+            content = content,
+            modes = modes,
+            strategy = selectionStrategy,
+            performanceWeight = performanceWeight,
+            securityWeight = securityWeight
+        )
+        
+        return modes.indexOf(selectedMode).takeIf { it >= 0 } ?: random.nextInt(modes.size)
     }
 
     private fun writeByString(data: String?, stringBlurWrapper: com.android.string.plugin.IString, modeIndex: Int, mv: MethodVisitor) {
