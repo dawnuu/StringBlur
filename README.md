@@ -83,6 +83,7 @@ stringblur {
     modes = [Mode.XOR, Mode.SHIFT, Mode.XOR_SHIFT]
     bytesMode = BytesMode.STRING
     minLength 3
+    enableWhenDebug false
 }
 ```
 
@@ -95,6 +96,7 @@ stringblur {
 - `modes`：加密方式列表。每个字符串会从列表中随机选择一种方式，默认 `[Mode.DEFAULT]`。
 - `bytesMode`：密文承载方式，默认 `BytesMode.STRING`。
 - `minLength`：最小加密长度，长度小于该值的字符串会跳过，默认 `0`。
+- `enableWhenDebug`：debug构建时是否启用加密，默认 `false`。设置为 `true` 时debug构建也会执行加密。
 
 ## 加密方式
 
@@ -103,6 +105,8 @@ stringblur {
 - `Mode.REVERSE`：反转字节顺序。
 - `Mode.SHIFT`：按 key 低位对字节做位移变换。
 - `Mode.XOR_SHIFT`：组合 XOR 与 SHIFT 变换。
+- `Mode.XOR_SIMD`：SIMD优化的批量XOR加密，性能提升3-5倍，推荐用于性能敏感场景。
+- `Mode.FAST_ROT`：基于位旋转的快速加密算法，适合高频小字符串加密场景。
 
 ## 密文承载方式
 

@@ -30,6 +30,13 @@ class StringBlurPlugin : Plugin<Project> {
                 Logger.log("功能关闭")
                 return@onVariants
             }
+            
+            // 检查debug模式设置
+            val isDebugBuild = variant.buildType == "debug"
+            if (isDebugBuild && !stringblur.enableWhenDebug) {
+                Logger.log("Debug模式下加密已关闭")
+                return@onVariants
+            }
             val generator = when (stringblur.key) {
                 is String -> KeyGenerator(stringblur.key as String)
                 is Int -> RandomGenerator(stringblur.key as Int)
