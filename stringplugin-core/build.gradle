@@ -7,20 +7,22 @@ plugins {
 group = 'com.android.string.plugin'
 version = VERSION
 
+configurations.all {
+    resolutionStrategy {
+        force "com.android.tools.build:gradle:7.4.0"
+        force "com.android.tools.build:gradle-api:7.4.0"
+    }
+}
+
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation "org.ow2.asm:asm:9.9.1"
+    implementation "org.ow2.asm:asm:9.10.1"
     implementation "com.squareup:javawriter:2.5.1"
-    implementation "com.android.tools.build:gradle:7.4.0"
+    compileOnly "com.android.tools.build:gradle:8.13.2"
     implementation project(":stringplugin-common")
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
 
 gradlePlugin {
     plugins {
