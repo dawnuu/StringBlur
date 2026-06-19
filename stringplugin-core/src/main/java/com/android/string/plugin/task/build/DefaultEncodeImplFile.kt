@@ -33,18 +33,16 @@ class DefaultEncodeImplFile : BaseFile() {
                 String::class.java.simpleName,
                 "key"
             )
-            .emitStatement(
-                "int lenKey = key.length();\n" +
-                        "        int j = 0;\n" +
-                        "        for (int i = 0; i < data.length; i++) {\n" +
-                        "            if (j >= lenKey) {\n" +
-                        "                j = 0;\n" +
-                        "            }\n" +
-                        "            data[i] = (byte) (data[i] + key.charAt(j));\n" +
-                        "            j++;\n" +
-                        "        }\n" +
-                        "        return data"
-            )
+            .emitStatement("int lenKey = key.length()")
+            .emitStatement("int j = 0")
+            .beginControlFlow("for (int i = 0; i < data.length; i++)")
+            .beginControlFlow("if (j >= lenKey)")
+            .emitStatement("j = 0")
+            .endControlFlow()
+            .emitStatement("data[i] = (byte) (data[i] + key.charAt(j))")
+            .emitStatement("j++")
+            .endControlFlow()
+            .emitStatement("return data")
             .endMethod()
             .emitAnnotation(Override::class.java)
             .beginMethod(
@@ -56,18 +54,16 @@ class DefaultEncodeImplFile : BaseFile() {
                 ByteArray::class.java.simpleName,
                 "key"
             )
-            .emitStatement(
-                " int lenKey = key.length;\n" +
-                        "        int j = 0;\n" +
-                        "        for (int i = 0; i < data.length; i++) {\n" +
-                        "            if (j >= lenKey) {\n" +
-                        "                j = 0;\n" +
-                        "            }\n" +
-                        "            data[i] = (byte) (data[i] - key[j]);\n" +
-                        "            j++;\n" +
-                        "        }\n" +
-                        "        return data"
-            )
+            .emitStatement("int lenKey = key.length")
+            .emitStatement("int j = 0")
+            .beginControlFlow("for (int i = 0; i < data.length; i++)")
+            .beginControlFlow("if (j >= lenKey)")
+            .emitStatement("j = 0")
+            .endControlFlow()
+            .emitStatement("data[i] = (byte) (data[i] - key[j])")
+            .emitStatement("j++")
+            .endControlFlow()
+            .emitStatement("return data")
             .endMethod()
             .endType()
     }

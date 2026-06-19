@@ -51,6 +51,16 @@ object Constant {
     const val XOR_SHIFT_IMPL_CLASS_NAME = "XorShiftEncodeImpl"
 
     /**
+     * SIMD优化的XOR加解密实现类类名
+     */
+    const val XOR_SIMD_IMPL_CLASS_NAME = "XorSimdEncodeImpl"
+
+    /**
+     * 快速旋转加解密实现类类名
+     */
+    const val FAST_ROT_IMPL_CLASS_NAME = "FastRotEncodeImpl"
+
+    /**
      * 加解密抽象接口
      */
     const val ABSTRACT_CLASS_NAME = "com.android.string.plugin.IString"
@@ -63,4 +73,6 @@ object Constant {
     const val REVERSE_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$REVERSE_IMPL_CLASS_NAME"
     const val SHIFT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$SHIFT_IMPL_CLASS_NAME"
     const val XOR_SHIFT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_SHIFT_IMPL_CLASS_NAME"
+    const val XOR_SIMD_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_SIMD_IMPL_CLASS_NAME"
+    const val FAST_ROT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$FAST_ROT_IMPL_CLASS_NAME"
 }

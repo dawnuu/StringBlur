@@ -60,21 +60,19 @@ class XorEncodeImplFile : BaseFile() {
                 ByteArray::class.java.simpleName,
                 "key"
             )
-            .emitStatement(
-                "int len = data.length;\n" +
-                        "        int lenKey = key.length;\n" +
-                        "        int i = 0;\n" +
-                        "        int j = 0;\n" +
-                        "        while (i < len) {\n" +
-                        "            if (j >= lenKey) {\n" +
-                        "                j = 0;\n" +
-                        "            }\n" +
-                        "            data[i] = (byte) (data[i] ^ key[j]);\n" +
-                        "            i++;\n" +
-                        "            j++;\n" +
-                        "        }\n" +
-                        "        return data"
-            )
+            .emitStatement("int len = data.length")
+            .emitStatement("int lenKey = key.length")
+            .emitStatement("int i = 0")
+            .emitStatement("int j = 0")
+            .beginControlFlow("while (i < len)")
+            .beginControlFlow("if (j >= lenKey)")
+            .emitStatement("j = 0")
+            .endControlFlow()
+            .emitStatement("data[i] = (byte) (data[i] ^ key[j])")
+            .emitStatement("i++")
+            .emitStatement("j++")
+            .endControlFlow()
+            .emitStatement("return data")
             .endMethod()
             .endType()
     }

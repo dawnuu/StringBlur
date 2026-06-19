@@ -6,6 +6,13 @@ import com.android.string.plugin.task.BaseFile
 import com.squareup.javawriter.JavaWriter
 import javax.lang.model.element.Modifier
 
+/**
+ * XOR-SHIFT复合加密算法专用文件生成器
+ * 生成的代码结合XOR和位移操作以实现最高安全性
+ *
+ * @author chancey
+ * @date 2023/9/5
+ **/
 class XorShiftEncodeImplFile : BaseFile() {
     override fun write(writer: JavaWriter, applicationId: String, mode: Mode) {
         val pkg = Constant.PLUGIN_CLASS_PACKAGE.format(applicationId)
@@ -27,7 +34,8 @@ class XorShiftEncodeImplFile : BaseFile() {
                 String::class.java.simpleName,
                 "key"
             )
-            .emitStatement("return shift(xor(data, key.getBytes()), key.getBytes(), 1)")
+            .emitStatement("byte[] xorResult = xor(data, key.getBytes())")
+            .emitStatement("return shift(xorResult, key.getBytes(), 1)")
             .endMethod()
             .emitAnnotation(Override::class.java)
             .beginMethod(
@@ -39,7 +47,8 @@ class XorShiftEncodeImplFile : BaseFile() {
                 ByteArray::class.java.simpleName,
                 "key"
             )
-            .emitStatement("return xor(shift(data, key, -1), key)")
+            .emitStatement("byte[] shiftResult = shift(data, key, -1)")
+            .emitStatement("return xor(shiftResult, key)")
             .endMethod()
             .beginMethod(
                 ByteArray::class.java.simpleName,
@@ -52,7 +61,7 @@ class XorShiftEncodeImplFile : BaseFile() {
             )
             .emitStatement(
                 "for (int i = 0; i < data.length; i++) {\n" +
-                        "            data[i] = (byte) (data[i] ^ key[i % key.length]);\n" +
+                        "            data[i] = (byte) (data[i] ^ key[i %% key.length]);\n" +
                         "        }\n" +
                         "        return data"
             )
@@ -70,7 +79,7 @@ class XorShiftEncodeImplFile : BaseFile() {
             )
             .emitStatement(
                 "for (int i = 0; i < data.length; i++) {\n" +
-                        "            int offset = key[i % key.length] & 0x0F;\n" +
+                        "            int offset = key[i %% key.length] & 0x0F;\n" +
                         "            data[i] = (byte) (data[i] + direction * offset);\n" +
                         "        }\n" +
                         "        return data"

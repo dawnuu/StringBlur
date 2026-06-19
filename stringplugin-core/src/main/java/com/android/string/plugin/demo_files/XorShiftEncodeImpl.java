@@ -2,6 +2,14 @@ package com.android.string.plugin.demo_files;
 
 import com.android.string.plugin.IString;
 
+/**
+ * XOR与位移复合加密算法实现
+ * 先进行XOR操作再进行位移变换，提供更高的安全性
+ * 适用于对安全性要求较高的敏感数据加密
+ *
+ * @author chancey
+ * @date 2024/1/12
+ **/
 public final class XorShiftEncodeImpl implements IString {
     @Override
     public byte[] encrypt(byte[] data, String key) {

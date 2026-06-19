@@ -6,6 +6,13 @@ import com.android.string.plugin.task.BaseFile
 import com.squareup.javawriter.JavaWriter
 import javax.lang.model.element.Modifier
 
+/**
+ * 位移加密算法专用文件生成器
+ * 生成的代码使用密钥低位进行位移操作
+ *
+ * @author chancey
+ * @date 2023/9/5
+ **/
 class ShiftEncodeImplFile : BaseFile() {
     override fun write(writer: JavaWriter, applicationId: String, mode: Mode) {
         val pkg = Constant.PLUGIN_CLASS_PACKAGE.format(applicationId)
@@ -52,14 +59,12 @@ class ShiftEncodeImplFile : BaseFile() {
                 "int",
                 "direction"
             )
-            .emitStatement(
-                "int lenKey = key.length;\n" +
-                        "        for (int i = 0; i < data.length; i++) {\n" +
-                        "            int offset = key[i % lenKey] & 0x0F;\n" +
-                        "            data[i] = (byte) (data[i] + direction * offset);\n" +
-                        "        }\n" +
-                        "        return data"
-            )
+            .emitStatement("int lenKey = key.length")
+            .beginControlFlow("for (int i = 0; i < data.length; i++)")
+            .emitStatement("int offset = key[i %% lenKey] & 0x0F")
+            .emitStatement("data[i] = (byte) (data[i] + direction * offset)")
+            .endControlFlow()
+            .emitStatement("return data")
             .endMethod()
             .endType()
     }
