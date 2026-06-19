@@ -73,7 +73,7 @@ class StringBlurPlugin : Plugin<Project> {
     private fun appendImplementations(project: Project) {
         project.dependencies.add(
             "implementation",
-            "com.android.string.plugin:common:1.1.6"
+            "com.android.string.plugin:common:$GRADLE_VERSION"
         )
     }
 }

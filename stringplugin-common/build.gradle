@@ -3,6 +3,39 @@ plugins {
     id 'maven-publish'
 }
 
+def getVersionFromGradleProperties() {
+    def gradlePropsFile = file("../gradle.properties")
+    if (gradlePropsFile.exists()) {
+        def props = new Properties()
+        gradlePropsFile.withInputStream { props.load(it) }
+        def version = props.getProperty("VERSION")
+        if (version != null && version != "unspecified") {
+            return version
+        }
+    }
+    return "2.1.0-SNAPSHOT" // 默认回退
+}
+
+// 生成包含VERSION的Kotlin文件，这样插件运行时就能访问了
+task generateVersionConstant {
+    def outputDir = file("$buildDir/generated-src")
+    inputs.property "version", getVersionFromGradleProperties()
+    outputs.dir outputDir
+
+    doLast {
+        def versionFile = file("$outputDir/com/android/string/plugin/VersionConstants.kt")
+        versionFile.parentFile.mkdirs()
+        versionFile.text = """
+package com.android.string.plugin
+
+// 自动生成的版本常量 - 包含gradle.properties中的VERSION
+const val GRADLE_VERSION = \"${getVersionFromGradleProperties()}\"
+"""
+    }
+}
+
+sourceSets.main.kotlin.srcDir "$buildDir/generated-src"
+compileKotlin.dependsOn generateVersionConstant
 publishing {
     publications {
         StringBlurCommon(MavenPublication) {
