@@ -102,8 +102,6 @@ stringblur {
 
     // Also encrypt debug variants when enabled.
     enableWhenDebug = false
-    // Keep strings passed to sensitive APIs plaintext; heuristic detection.
-    skipSensitiveApi = true
 
     // RANDOM, SMART, PERFORMANCE, or SECURITY algorithm selection.
     selectionStrategy = SelectionStrategy.SMART
@@ -146,8 +144,6 @@ stringblur {
 
     // Also encrypt debug variants when enabled.
     enableWhenDebug = false
-    // Keep strings passed to sensitive APIs plaintext; heuristic detection.
-    skipSensitiveApi = true
 
     // RANDOM, SMART, PERFORMANCE, or SECURITY algorithm selection.
     selectionStrategy = SelectionStrategy.SMART

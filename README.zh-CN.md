@@ -101,8 +101,6 @@ stringblur {
 
     // 是否同时对 debug variant 启用加密。
     enableWhenDebug = false
-    // 敏感 API 入参保持明文，识别方式为启发式。
-    skipSensitiveApi = true
 
     // 算法选择：RANDOM、SMART、PERFORMANCE 或 SECURITY。
     selectionStrategy = SelectionStrategy.SMART
@@ -145,8 +143,6 @@ stringblur {
 
     // 是否同时对 debug variant 启用加密。
     enableWhenDebug = false
-    // 敏感 API 入参保持明文，识别方式为启发式。
-    skipSensitiveApi = true
 
     // 算法选择：RANDOM、SMART、PERFORMANCE 或 SECURITY。
     selectionStrategy = SelectionStrategy.SMART
