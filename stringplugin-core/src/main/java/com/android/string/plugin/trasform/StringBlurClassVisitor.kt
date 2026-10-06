@@ -5,7 +5,6 @@ import com.android.string.plugin.field.StringFiled
 import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.SelectionStrategy
-import com.android.string.plugin.trasform.visitor.SensitiveStringAnalyzer
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -27,12 +26,11 @@ class StringBlurClassVisitor(
     modes: List<Mode>,
     reportPath: String?,
     minLength: Int,
-    skipSensitiveApi: Boolean,
     selectionStrategy: SelectionStrategy,
     performanceWeight: Double,
     securityWeight: Double,
 ) : ClassVisitor(Opcodes.ASM9, cv) {
-    private val controller = ClassVisitorController(wrapperClass, wrapperMethod, key, bytesMode, modes, reportPath, minLength, skipSensitiveApi, selectionStrategy, performanceWeight, securityWeight)
+    private val controller = ClassVisitorController(wrapperClass, wrapperMethod, key, bytesMode, modes, reportPath, minLength, selectionStrategy, performanceWeight, securityWeight)
 
     override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor {
         when (descriptor) {
@@ -138,11 +136,7 @@ class StringBlurClassVisitor(
         return object : MethodNode(Opcodes.ASM9, access, name, descriptor, signature, exceptions) {
             override fun visitEnd() {
                 super.visitEnd()
-                val sensitiveLdcOrdinals = SensitiveStringAnalyzer.findSensitiveLdcOrdinals(
-                    controller.currentClassName,
-                    this
-                )
-                accept(controller.visitMethod(access, mv, name, sensitiveLdcOrdinals, maxLocals))
+                accept(controller.visitMethod(access, mv, name, maxLocals))
             }
         }
     }

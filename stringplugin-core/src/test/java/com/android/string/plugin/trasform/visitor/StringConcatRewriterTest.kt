@@ -55,7 +55,6 @@ class StringConcatRewriterTest {
             listOf(com.android.string.plugin.mode.Mode.DEFAULT),
             null,
             3,
-            true,
             com.android.string.plugin.mode.SelectionStrategy.RANDOM,
             0.5,
             0.5

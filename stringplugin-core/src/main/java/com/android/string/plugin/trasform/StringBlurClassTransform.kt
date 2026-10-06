@@ -3,7 +3,6 @@ package com.android.string.plugin.trasform
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
-import com.android.string.plugin.data.Constant
 import com.android.string.plugin.trasform.parameters.StringBlurInstrumentationParameters
 import org.objectweb.asm.ClassVisitor
 
@@ -15,15 +14,24 @@ abstract class StringBlurClassTransform :
         val params = parameters.get()
         val whiteList = params.whiteList.get()
 
-        val isInWhiteList = whiteList.any { whiteEntry ->
-            className.endsWith(whiteEntry) || className.startsWith(whiteEntry)
-        }
+        val isInWhiteList = isWhiteListed(className, whiteList)
+        return !isInWhiteList && isInEncodePackages(className)
+    }
 
-        if (isInWhiteList) {
-            return false
+    private fun isWhiteListed(className: String, whiteList: List<String>): Boolean {
+        val normalizedClass = className.replace('/', '.')
+        return whiteList.any { whiteEntry ->
+            when {
+                whiteEntry.endsWith(".") -> normalizedClass.startsWith(whiteEntry)
+                whiteEntry.contains(".") -> {
+                    normalizedClass == whiteEntry || normalizedClass.startsWith("$whiteEntry.")
+                }
+                else -> {
+                    val simpleName = normalizedClass.substringAfterLast('.')
+                    simpleName == whiteEntry || simpleName.startsWith("$whiteEntry$")
+                }
+            }
         }
-
-        return isInEncodePackages(className)
     }
 
     override fun createClassVisitor(
@@ -40,7 +48,6 @@ abstract class StringBlurClassTransform :
                 modes.get(),
                 reportPath.orNull,
                 minLength.get(),
-                skipSensitiveApi.get(),
                 selectionStrategy.get(),
                 performanceWeight.get(),
                 securityWeight.get()

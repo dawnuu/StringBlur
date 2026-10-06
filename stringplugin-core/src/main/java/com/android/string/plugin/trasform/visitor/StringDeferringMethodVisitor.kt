@@ -10,9 +10,8 @@ import org.objectweb.asm.Opcodes
 
 /**
  * 可加密字符串 LDC 的延迟发射基类：LDC 先暂存，观察紧随其后的指令——
- * 若流入敏感 API（[SensitiveApiDetector]）或处于 @KeepString 范围则保持明文，
- * 否则照常加密。除 LDC 与方法调用外的任意指令都会先冲刷暂存串，
- * 保证加解密序列始终占据原 LDC 的栈位置。
+ * 若处于 @KeepString 范围则保持明文，否则照常加密。除 LDC 与方法调用外的
+ * 任意指令都会先冲刷暂存串，保证加解密序列始终占据原 LDC 的栈位置。
  *
  * @author chancey
  * @date   2026/8/30
@@ -21,12 +20,10 @@ abstract class StringDeferringMethodVisitor(
     mv: MethodVisitor,
     protected val controller: ClassVisitorController,
     protected val methodName: String?,
-    private val sensitiveLdcOrdinals: Set<Int> = emptySet(),
     initialMaxLocals: Int = 0
 ) : MethodVisitor(Opcodes.ASM9, mv) {
 
     private var pending: String? = null
-    private var ldcOrdinal: Int = 0
     private var nextLocal: Int = initialMaxLocals
 
     // 暂存串是否处于 @KeepString 范围，在 LDC 时确定
@@ -68,13 +65,6 @@ abstract class StringDeferringMethodVisitor(
 
     override fun visitLdcInsn(value: Any?) {
         flush()
-        val isSensitiveString = value is String && ldcOrdinal++ in sensitiveLdcOrdinals
-        if (isSensitiveString && !keepActive() && !forceActive()) {
-            controller.reportIgnored(methodName, value, REASON_SENSITIVE)
-            super.visitLdcInsn(value)
-            resetPendingState()
-            return
-        }
         if (value is String && !value.isEmpty() && (controller.overflow(value) || forceActive())) {
             pending = value
             pendingKeep = keepActive()
@@ -93,13 +83,7 @@ abstract class StringDeferringMethodVisitor(
         isInterface: Boolean
     ) {
         if (pending != null) {
-            flushWith(
-                when {
-                    pendingKeep -> REASON_KEEP
-                    !forceActive() && controller.isSensitiveCall(owner, name) -> REASON_SENSITIVE
-                    else -> null
-                }
-            )
+            flush()
         }
         super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
     }
@@ -241,6 +225,5 @@ abstract class StringDeferringMethodVisitor(
 
     companion object {
         const val REASON_KEEP = "keepString"
-        const val REASON_SENSITIVE = "sensitiveApi"
     }
 }

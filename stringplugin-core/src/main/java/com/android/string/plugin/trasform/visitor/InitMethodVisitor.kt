@@ -13,9 +13,8 @@ class InitMethodVisitor(
     mv: MethodVisitor,
     controller: ClassVisitorController,
     methodName: String?,
-    sensitiveLdcOrdinals: Set<Int> = emptySet(),
     maxLocals: Int = 0
-) : StringDeferringMethodVisitor(mv, controller, methodName, sensitiveLdcOrdinals, maxLocals) {
+) : StringDeferringMethodVisitor(mv, controller, methodName, maxLocals) {
 
     override fun flushPending(value: String, skipReason: String?) {
         // We don't care about whether the field is final or normal

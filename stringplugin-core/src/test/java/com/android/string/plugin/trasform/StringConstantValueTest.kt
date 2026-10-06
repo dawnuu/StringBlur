@@ -36,7 +36,6 @@ class StringConstantValueTest {
             listOf(Mode.DEFAULT),
             null,
             3,
-            true,
             SelectionStrategy.RANDOM,
             0.5,
             0.5

@@ -23,6 +23,4 @@ abstract class StringBlurExtension {
     var performanceWeight: Double = 0.5 // 性能权重 (0.0-1.0)，仅在SelectionStrategy.SMART时生效
     var securityWeight: Double = 0.5 // 安全权重 (0.0-1.0)，仅在SelectionStrategy.SMART时生效
 
-    // 流入反射、动态加载等敏感 API 的字符串保持明文，避免解密链路缺失的环境（如单元测试）崩溃
-    var skipSensitiveApi: Boolean = true
 }

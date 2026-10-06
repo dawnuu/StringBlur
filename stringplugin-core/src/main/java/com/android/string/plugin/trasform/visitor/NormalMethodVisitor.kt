@@ -10,13 +10,11 @@ import org.objectweb.asm.Opcodes
  * @date   2023/12/9   20:33
  **/
 class NormalMethodVisitor(
-    private val access: Int,
     mv: MethodVisitor,
     controller: ClassVisitorController,
     methodName: String?,
-    sensitiveLdcOrdinals: Set<Int> = emptySet(),
     maxLocals: Int = 0
-) : StringDeferringMethodVisitor(mv, controller, methodName, sensitiveLdcOrdinals, maxLocals) {
+) : StringDeferringMethodVisitor(mv, controller, methodName, maxLocals) {
 
     override fun flushPending(value: String, skipReason: String?) {
         if (skipReason != null) {
@@ -35,23 +33,6 @@ class NormalMethodVisitor(
                         StringFiled.DESC
                     )
                     return@End
-                }
-            }
-            if ((access and Opcodes.ACC_STATIC) == 0) {
-                //静态方法不能使用类的final成员变量
-                // If the value is a final field (not static)
-                controller.finalFields.forEach {
-                    // if the value of a final field is null, we ignore it
-                    if (value == it.value) {
-                        super.visitVarInsn(Opcodes.ALOAD, 0)
-                        super.visitFieldInsn(
-                            Opcodes.GETFIELD,
-                            controller.currentClassName,
-                            it.name,
-                            StringFiled.DESC
-                        )
-                        return@End
-                    }
                 }
             }
             // local variables
