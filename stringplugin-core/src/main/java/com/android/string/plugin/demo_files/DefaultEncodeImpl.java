@@ -1,6 +1,7 @@
 package com.android.string.plugin.demo_files;
 //package applicationId.stringblur;
 
+import java.nio.charset.StandardCharsets;
 import com.android.string.plugin.IString;
 
 /**
@@ -12,13 +13,14 @@ import com.android.string.plugin.IString;
 public final class DefaultEncodeImpl implements IString {
     @Override
     public byte[] encrypt(byte[] data, String key) {
-        int lenKey = key.length();
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+        int lenKey = keyBytes.length;
         int j = 0;
         for (int i = 0; i < data.length; i++) {
             if (j >= lenKey) {
                 j = 0;
             }
-            data[i] = (byte) (data[i] + key.charAt(j));
+            data[i] = (byte) (data[i] + keyBytes[j]);
             j++;
         }
         return data;

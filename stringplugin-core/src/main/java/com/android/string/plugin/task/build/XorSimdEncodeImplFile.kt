@@ -11,7 +11,7 @@ import javax.lang.model.element.Modifier
  * 生成的代码充分发挥SIMD批量处理性能优势
  *
  * @author chancey
- * @date 2026/6/19
+ * @date   2026/6/19
  **/
 class XorSimdEncodeImplFile : BaseFile() {
     override fun write(writer: JavaWriter, applicationId: String, mode: Mode) {
@@ -35,11 +35,12 @@ class XorSimdEncodeImplFile : BaseFile() {
                 "key"
             )
             .emitStatement("if (data == null || data.length == 0 || key == null) return data")
-            .emitStatement("byte[] keyBytes = key.getBytes()")
+            .emitStatement("byte[] keyBytes = key.getBytes(java.nio.charset.StandardCharsets.UTF_8)")
             .emitStatement("if (keyBytes.length == 0) return data")
             .emitEmptyLine()
             .emitStatement("int dataLen = data.length")
             .emitStatement("int keyLen = keyBytes.length")
+            .emitStatement("int tailStart = 0")
             .emitEmptyLine()
             .emitStatement("// 8字节批量处理 (SIMD风格优化)")
             .emitStatement("int longLen = dataLen / 8")
@@ -69,10 +70,11 @@ class XorSimdEncodeImplFile : BaseFile() {
             .emitStatement("data[offset + 6] = (byte) ((encrypted >> 48) & 0xFF)")
             .emitStatement("data[offset + 7] = (byte) ((encrypted >> 56) & 0xFF)")
             .endControlFlow()
+            .emitStatement("tailStart = longLen * 8")
             .endControlFlow()
             .emitEmptyLine()
             .emitStatement("// 处理剩余字节")
-            .beginControlFlow("for (int i = longLen * 8; i < dataLen; i++)")
+            .beginControlFlow("for (int i = tailStart; i < dataLen; i++)")
             .emitStatement("data[i] = (byte) (data[i] ^ keyBytes[i %% keyLen])")
             .endControlFlow()
             .emitStatement("return data")
@@ -88,7 +90,7 @@ class XorSimdEncodeImplFile : BaseFile() {
                 ByteArray::class.java.simpleName,
                 "key"
             )
-            .emitStatement("return encrypt(data, new String(key))")
+            .emitStatement("return encrypt(data, new String(key, java.nio.charset.StandardCharsets.UTF_8))")
             .endMethod()
             .emitEmptyLine()
             .beginMethod(

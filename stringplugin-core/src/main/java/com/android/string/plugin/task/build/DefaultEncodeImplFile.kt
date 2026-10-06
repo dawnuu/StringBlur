@@ -33,13 +33,14 @@ class DefaultEncodeImplFile : BaseFile() {
                 String::class.java.simpleName,
                 "key"
             )
-            .emitStatement("int lenKey = key.length()")
+            .emitStatement("byte[] keyBytes = key.getBytes(java.nio.charset.StandardCharsets.UTF_8)")
+            .emitStatement("int lenKey = keyBytes.length")
             .emitStatement("int j = 0")
             .beginControlFlow("for (int i = 0; i < data.length; i++)")
             .beginControlFlow("if (j >= lenKey)")
             .emitStatement("j = 0")
             .endControlFlow()
-            .emitStatement("data[i] = (byte) (data[i] + key.charAt(j))")
+            .emitStatement("data[i] = (byte) (data[i] + keyBytes[j])")
             .emitStatement("j++")
             .endControlFlow()
             .emitStatement("return data")

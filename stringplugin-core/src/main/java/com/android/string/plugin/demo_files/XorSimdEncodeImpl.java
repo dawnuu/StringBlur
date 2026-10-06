@@ -15,12 +15,13 @@ public final class XorSimdEncodeImpl implements IString {
     public byte[] encrypt(byte[] data, String key) {
         if (!overflow(data) || key == null) return data;
         
-        byte[] keyBytes = key.getBytes();
+        byte[] keyBytes = key.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         if (keyBytes.length == 0) return data;
         
         // SIMD风格的批量处理优化
         int dataLen = data.length;
         int keyLen = keyBytes.length;
+        int tailStart = 0;
         
         // 使用long类型进行批量处理（8字节一组）
         int longLen = dataLen / 8;
@@ -51,10 +52,11 @@ public final class XorSimdEncodeImpl implements IString {
                 data[offset + 6] = (byte) ((encrypted >> 48) & 0xFF);
                 data[offset + 7] = (byte) ((encrypted >> 56) & 0xFF);
             }
+            tailStart = longLen * 8;
         }
         
         // 处理剩余字节（传统XOR）
-        for (int i = longLen * 8; i < dataLen; i++) {
+        for (int i = tailStart; i < dataLen; i++) {
             data[i] = (byte) (data[i] ^ keyBytes[i % keyLen]);
         }
         
@@ -65,7 +67,7 @@ public final class XorSimdEncodeImpl implements IString {
     public byte[] decrypt(byte[] data, byte[] key) {
         // XOR解密与加密相同，但需要处理key为byte[]的情况
         if (!overflow(data) || key == null) return data;
-        return encrypt(data, new String(key));
+        return encrypt(data, new String(key, java.nio.charset.StandardCharsets.UTF_8));
     }
     
     /**
