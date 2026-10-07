@@ -40,6 +40,14 @@ gradlePlugin {
     }
 }
 
+// The legacy plugin ID is available via buildscript and Maven Local.
+// Its marker uses the unowned 'stringblur' namespace and cannot go to Central.
+tasks.withType(org.gradle.api.publish.maven.tasks.PublishToMavenRepository).configureEach {
+    if (name == 'publishStringblurPluginMarkerMavenPublicationToMavenCentralRepository') {
+        enabled = false
+    }
+}
+
 mavenPublishing {
     coordinates("io.github.dawnuu", "stringblur", VERSION)
     publishToMavenCentral()
