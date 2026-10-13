@@ -25,6 +25,10 @@ class AsmWriter(private val className: String, private val methodName: String = 
 
     fun write(data: ByteArray, tag: Int, modeIndex: Int, mv: MethodVisitor) {
         write(data, mv)
+        writeDecryptBytes(tag, modeIndex, mv)
+    }
+
+    internal fun writeDecryptBytes(tag: Int, modeIndex: Int, mv: MethodVisitor) {
         write(tag, mv)
         write(modeIndex, mv)
         mv.visitMethodInsn(
@@ -36,7 +40,7 @@ class AsmWriter(private val className: String, private val methodName: String = 
         )
     }
 
-    private fun write(value: ByteArray, mv: MethodVisitor) {
+    internal fun write(value: ByteArray, mv: MethodVisitor) {
         write(value.size, mv)
         mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BYTE)
         var i = 0
@@ -49,7 +53,7 @@ class AsmWriter(private val className: String, private val methodName: String = 
         }
     }
 
-    private fun write(value: Int, mv: MethodVisitor) {
+    internal fun write(value: Int, mv: MethodVisitor) {
         when (value) {
             in -1..5 -> mv.visitInsn(Opcodes.ICONST_0 + value)
             in Byte.MIN_VALUE..Byte.MAX_VALUE -> mv.visitIntInsn(Opcodes.BIPUSH, value)

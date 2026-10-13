@@ -29,6 +29,7 @@ class StringBlurClassVisitor(
     minLength: Int,
 ) : ClassVisitor(Opcodes.ASM9, cv) {
     private val controller = ClassVisitorController(wrapperClass, wrapperMethod, master, bytesMode, modes, report, minLength)
+    private val pendingMethods = mutableListOf<Pair<MethodNode, MethodVisitor>>()
 
     override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor {
         when (descriptor) {
@@ -47,10 +48,16 @@ class StringBlurClassVisitor(
         interfaces: Array<out String>?
     ) {
         controller.currentClassName = name
+        controller.prepareBytesMethods((access and Opcodes.ACC_INTERFACE) != 0, version)
         super.visit(version, access, name, signature, superName, interfaces)
     }
 
     override fun visitEnd() {
+        // Reserve every original method name before allocating helper names.
+        pendingMethods.forEach { (method, target) ->
+            ConstantAppendRewriter.rewrite(controller.currentClassName.orEmpty(), method)
+            method.accept(controller.visitMethod(method.access, target, method.name, method.maxLocals))
+        }
         if (controller.isVisitClInitMethod()) {
             controller.visitEnd(
                 super.visitMethod(
@@ -62,6 +69,7 @@ class StringBlurClassVisitor(
                 )
             )
         }
+        controller.bytesMethodWriter?.emit(cv)
         super.visitEnd()
     }
 
@@ -131,12 +139,9 @@ class StringBlurClassVisitor(
     ): MethodVisitor {
         val mv = super.visitMethod(access, name, descriptor, signature, exceptions)
             ?: return super.visitMethod(access, name, descriptor, signature, exceptions)
-        return object : MethodNode(Opcodes.ASM9, access, name, descriptor, signature, exceptions) {
-            override fun visitEnd() {
-                super.visitEnd()
-                ConstantAppendRewriter.rewrite(controller.currentClassName.orEmpty(), this)
-                accept(controller.visitMethod(access, mv, name, maxLocals))
-            }
+        name?.let { controller.reservedMethodNames += it }
+        return MethodNode(Opcodes.ASM9, access, name, descriptor, signature, exceptions).also {
+            pendingMethods += it to mv
         }
     }
 }

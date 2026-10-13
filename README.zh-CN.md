@@ -37,7 +37,7 @@ pluginManagement {
 
 ```toml
 [versions]
-stringblur = "1.0.4"
+stringblur = "1.0.5"
 
 [plugins]
 stringblur = { id = "io.github.dawnuu.stringblur", version.ref = "stringblur" }
@@ -63,7 +63,7 @@ Groovy DSL 在 `build.gradle` 中使用 `alias(libs.plugins.stringblur)`。
 
 ```kotlin
 plugins {
-    id("io.github.dawnuu.stringblur") version "1.0.4"
+    id("io.github.dawnuu.stringblur") version "1.0.5"
 }
 ```
 
@@ -160,8 +160,10 @@ stringblur {
 ## 密文承载方式
 
 - `BytesMode.STRING`：将密文保存为字符串常量。
-- `BytesMode.BYTES`：将密文保存为 byte array。
+- `BytesMode.BYTES`：将密文保存为 byte array，放入生成的 synthetic 辅助方法；长数组按 4096 字节分块初始化，避免数组初始化指令占用原方法的 64 KB 字节码预算。
 - `BytesMode.RANDOM`：每个字符串随机选择 `STRING` 或 `BYTES`。
+
+Java 7 及更早版本的接口不能声明静态辅助方法，因此自动使用 `STRING`。
 
 ## 安全说明
 

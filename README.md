@@ -38,7 +38,7 @@ Declare the plugin with a version catalog:
 ```toml
 # gradle/libs.versions.toml
 [versions]
-stringblur = "1.0.4"
+stringblur = "1.0.5"
 
 [plugins]
 stringblur = { id = "io.github.dawnuu.stringblur", version.ref = "stringblur" }
@@ -64,7 +64,7 @@ Without a version catalog:
 
 ```kotlin
 plugins {
-    id("io.github.dawnuu.stringblur") version "1.0.4"
+    id("io.github.dawnuu.stringblur") version "1.0.5"
 }
 ```
 
@@ -161,8 +161,10 @@ Enable the new modes with `modes = listOf(Mode.XOR_CHAIN, Mode.LCG_STREAM)` (Kot
 ## Encrypted data representation
 
 - `BytesMode.STRING`: stores encrypted data as a string constant.
-- `BytesMode.BYTES`: stores encrypted data as a byte array.
+- `BytesMode.BYTES`: stores encrypted data as a byte array in generated synthetic helper methods. Long arrays are initialized in 4096-byte chunks to keep array initialization out of the original method's 64 KB bytecode budget.
 - `BytesMode.RANDOM`: randomly chooses `STRING` or `BYTES` for each string.
+
+Interfaces compiled for Java 7 or earlier use `STRING`, since they cannot declare static helper methods.
 
 ## Security notes
 

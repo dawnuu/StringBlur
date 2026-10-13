@@ -82,12 +82,14 @@ class StringConcatRuntimeTest {
                             val transformed = transform(original, bytesMode, mode)
                             val node = ClassNode()
                             ClassReader(transformed).accept(node, 0)
-                            assertFalse(node.methods.single().instructions.any { it is InvokeDynamicInsnNode })
+                            assertFalse(node.methods.single { it.name == "join" }.instructions.any { it is InvokeDynamicInsnNode })
                             val plaintext = case.recipe.split('\u0001', '\u0002').filter { it.isNotEmpty() } +
                                 case.constants.filterIsInstance<String>()
-                            assertFalse(node.methods.single().instructions.any { it is LdcInsnNode && it.cst in plaintext })
+                            assertFalse(node.methods.any { method ->
+                                method.instructions.any { it is LdcInsnNode && it.cst in plaintext }
+                            })
                             if (case.appends.isNotEmpty()) {
-                                assertFalse(node.methods.single().instructions.any {
+                                assertFalse(node.methods.single { it.name == "join" }.instructions.any {
                                     it is org.objectweb.asm.tree.MethodInsnNode && it.owner == case.builder &&
                                         it.name == "append" && it.desc[1] != 'L'
                                 })
@@ -187,6 +189,6 @@ class StringConcatRuntimeTest {
         val loader = object : ClassLoader(parent) {
             fun loadSample() = defineClass("test.ConcatSample", bytes, 0, bytes.size)
         }
-        return loader.loadSample().declaredMethods.single().invoke(null, *case.arguments)
+        return loader.loadSample().declaredMethods.single { it.name == "join" }.invoke(null, *case.arguments)
     }
 }

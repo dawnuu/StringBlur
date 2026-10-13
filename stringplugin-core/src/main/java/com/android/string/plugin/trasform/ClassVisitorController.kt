@@ -28,6 +28,14 @@ class ClassVisitorController(
     private val minLength: Int
 ) {
     private val asmWriter = AsmWriter(wrapperClass, wrapperMethod)
+    internal var bytesMethodWriter: BytesMethodWriter? = null
+    internal val reservedMethodNames = mutableSetOf<String>()
+    internal fun prepareBytesMethods(isInterface: Boolean, version: Int) {
+        // Static interface methods require Java 8; older interfaces use STRING.
+        if (!isInterface || (version and 0xffff) >= Opcodes.V1_8) {
+            bytesMethodWriter = BytesMethodWriter(currentClassName!!, isInterface, asmWriter, reservedMethodNames)
+        }
+    }
     // 每个类用各自的种子，避免不同类里第 n 个字符串得到相同的 tag
     private var random = Random(master.contentHashCode())
     var currentClassName: String? = null
@@ -202,6 +210,7 @@ class ClassVisitorController(
     }
 
     private fun selectBytesMode(): BytesMode {
+        if (bytesMethodWriter == null) return BytesMode.STRING
         return when (bytesMode) {
             BytesMode.STRING -> BytesMode.STRING
             BytesMode.BYTES -> BytesMode.BYTES
@@ -236,6 +245,6 @@ class ClassVisitorController(
     ) {
         val tag = random.nextInt()
         val encodeText = stringBlurWrapper.encryptBytes(data, KeyDerivation.derive(master, tag))
-        asmWriter.write(encodeText, tag, modeIndex, mv)
+        bytesMethodWriter!!.write(encodeText, tag, modeIndex, mv)
     }
 }
