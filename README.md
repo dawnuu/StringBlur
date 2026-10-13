@@ -91,7 +91,7 @@ stringblur {
 
     // Available algorithms; an empty list falls back to Mode.DEFAULT.
     // One mode is used as-is; with several, one is chosen at random per string.
-    modes = listOf(Mode.XOR_SIMD, Mode.FAST_ROT, Mode.XOR_SHIFT)
+    modes = listOf(Mode.XOR, Mode.FAST_ROT, Mode.XOR_SHIFT)
     // STRING, BYTES, or RANDOM encrypted-data representation; default STRING.
     bytesMode = BytesMode.RANDOM
     // Skip strings shorter than this value; negative values become 0. Default 0.
@@ -120,7 +120,7 @@ stringblur {
 
     // Available algorithms; an empty list falls back to Mode.DEFAULT.
     // One mode is used as-is; with several, one is chosen at random per string.
-    modes = [Mode.XOR_SIMD, Mode.FAST_ROT, Mode.XOR_SHIFT]
+    modes = [Mode.XOR, Mode.FAST_ROT, Mode.XOR_SHIFT]
     // STRING, BYTES, or RANDOM encrypted-data representation; default STRING.
     bytesMode = BytesMode.RANDOM
     // Skip strings shorter than this value; negative values become 0. Default 0.
@@ -131,13 +131,24 @@ stringblur {
 }
 ```
 
+## String concatenation
+
+Direct boolean, character, integer, and floating-point constant appends to `StringBuilder`/`StringBuffer` are converted to text and passed through encryption before D8 can fold them into new plaintext. Numeric bootstrap constants in concat recipes are handled as text too. Only direct constants with verified stack provenance are rewritten; variables, arithmetic expressions, merged branch values, and lone surrogate characters stay intact. Length and annotation rules still apply; this does not cover all subsequent D8/R8 constant propagation.
+
+`StringConcatFactory.makeConcatWithConstants` invokedynamic calls are rewritten to `StringBuilder`, exposing fixed recipe text and string bootstrap constants to the existing encryption pipeline without `inline` compiler flags. Arbitrary call-site names and recipes mixing Class, MethodType, and numeric constants are supported; dynamic argument types and order are preserved.
+
+`minLength` applies to each extracted literal segment; short segments and `@KeepString` scopes remain plaintext. Calls without fixed text are left intact. Unsupported bootstrap constants such as MethodHandle or ConstantDynamic, or mismatched recipe argument counts, leave the original instruction intact and its recipe text unencrypted. This does not process `strings.xml`.
+
 ## Encryption modes
 
 - `Mode.DEFAULT`: byte addition/subtraction; the compatibility-oriented default.
 - `Mode.XOR`: basic XOR transformation.
 - `Mode.XOR_SHIFT`: combines XOR and byte shifting for stronger protection.
-- `Mode.XOR_SIMD`: batch XOR optimized for medium and long strings and performance-sensitive code.
 - `Mode.FAST_ROT`: fast bit rotation, suitable for frequent short strings.
+- `Mode.XOR_CHAIN`: each byte XORs the key byte and the previous ciphertext byte (initially 0); changing a plaintext byte changes all subsequent ciphertext bytes.
+- `Mode.LCG_STREAM`: hashes the entire UTF-8 key into a 32-bit seed with FNV-1a, then XORs each byte with the high byte of an LCG step (`state = state * 1664525 + 1013904223`, modulo 2^32). This avoids directly repeating key bytes; the stream is predictable and has a finite period.
+
+Enable the new modes with `modes = listOf(Mode.XOR_CHAIN, Mode.LCG_STREAM)` (Kotlin) or `modes = [Mode.XOR_CHAIN, Mode.LCG_STREAM]` (Groovy).
 
 ## Encrypted data representation
 

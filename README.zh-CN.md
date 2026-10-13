@@ -90,7 +90,7 @@ stringblur {
 
     // 可用加密算法，空列表会回退为 Mode.DEFAULT。
     // 只有一个时直接使用；有多个时每个字符串随机选择其中一个。
-    modes = listOf(Mode.XOR_SIMD, Mode.FAST_ROT, Mode.XOR_SHIFT)
+    modes = listOf(Mode.XOR, Mode.FAST_ROT, Mode.XOR_SHIFT)
     // 密文承载方式：STRING、BYTES 或 RANDOM，默认 STRING。
     bytesMode = BytesMode.RANDOM
     // 跳过长度小于该值的字符串，负数按 0 处理，默认 0。
@@ -119,7 +119,7 @@ stringblur {
 
     // 可用加密算法，空列表会回退为 Mode.DEFAULT。
     // 只有一个时直接使用；有多个时每个字符串随机选择其中一个。
-    modes = [Mode.XOR_SIMD, Mode.FAST_ROT, Mode.XOR_SHIFT]
+    modes = [Mode.XOR, Mode.FAST_ROT, Mode.XOR_SHIFT]
     // 密文承载方式：STRING、BYTES 或 RANDOM，默认 STRING。
     bytesMode = BytesMode.RANDOM
     // 跳过长度小于该值的字符串，负数按 0 处理，默认 0。
@@ -130,13 +130,24 @@ stringblur {
 }
 ```
 
+## 字符串拼接
+
+对 `StringBuilder`／`StringBuffer` 中直接追加的布尔、字符、整数和浮点常量，先转换为文本，再交给现有加密流程，避免 D8 将这些常量拼接折叠成新的明文。拼接模板中的数值 bootstrap 常量也会按文本处理。只改写能确认栈来源的直接常量；变量、算术表达式、分支汇合值和孤立代理字符保持原样。加密仍遵循 `minLength` 和注解规则，此处理不保证覆盖 D8/R8 的所有后续常量传播。
+
+自动将 `StringConcatFactory.makeConcatWithConstants` 的 `invokedynamic` 拼接改写为 `StringBuilder`，对模板中的固定文本及字符串 bootstrap 常量使用现有加密流程，无需添加 `inline` 编译参数。支持任意调用点名称，以及与 Class、MethodType、数值常量混合的模板；保留动态参数的类型和顺序。
+
+`minLength` 按拆出的每个固定片段判断，短片段和 `@KeepString` 范围仍保留明文。没有固定文本的拼接保持原样。含 MethodHandle、ConstantDynamic 等不支持的 bootstrap 常量，或模板参数数量不匹配时保持原指令，其模板文本不会被加密。此功能不处理 `strings.xml`。
+
 ## 加密方式
 
 - `Mode.DEFAULT`：对字节做加减变换，兼容性优先的默认算法。
 - `Mode.XOR`：基础异或变换。
 - `Mode.XOR_SHIFT`：组合 XOR 与字节位移，安全性更强。
-- `Mode.XOR_SIMD`：针对中长字符串和性能敏感场景优化的批量 XOR。
 - `Mode.FAST_ROT`：快速位旋转，适合高频短字符串。
+- `Mode.XOR_CHAIN`：每字节异或 key 字节和前一个密文字节（初始为 0）；修改一个明文字节会影响它及后续所有密文字节。
+- `Mode.LCG_STREAM`：用整条 key 的 UTF-8 字节经 FNV-1a 生成 32 位种子，每步执行 LCG（`state = state * 1664525 + 1013904223`，模 2^32），取高 8 位与数据异或。避免直接重复 key 字节，但密钥流可预测且有有限周期。
+
+启用示例：Kotlin 使用 `modes = listOf(Mode.XOR_CHAIN, Mode.LCG_STREAM)`，Groovy 使用 `modes = [Mode.XOR_CHAIN, Mode.LCG_STREAM]`。
 
 ## 密文承载方式
 
