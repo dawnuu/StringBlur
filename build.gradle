@@ -1,6 +1,6 @@
 buildscript {
     dependencies {
-//        classpath "io.github.dawnuu:stringblur:1.0.1"
+//        classpath "io.github.dawnuu:stringblur:1.0.4"
     }
 }
 plugins {

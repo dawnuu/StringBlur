@@ -38,7 +38,7 @@ Declare the plugin with a version catalog:
 ```toml
 # gradle/libs.versions.toml
 [versions]
-stringblur = "1.0.1"
+stringblur = "1.0.4"
 
 [plugins]
 stringblur = { id = "io.github.dawnuu.stringblur", version.ref = "stringblur" }
@@ -64,9 +64,13 @@ Without a version catalog:
 
 ```kotlin
 plugins {
-    id("io.github.dawnuu.stringblur") version "1.0.1"
+    id("io.github.dawnuu.stringblur") version "1.0.4"
 }
 ```
+
+## Upgrading to 1.0.4
+
+This release contains breaking changes. See [the release notes](CHANGELOG.md) for removed modes and configuration fields, replacement settings, and changes to the default instrumentation scope. Remove obsolete settings and imports, then perform a clean build.
 
 ## Configuration
 
@@ -99,6 +103,8 @@ stringblur {
 
     // Also encrypt debug variants when enabled; default false.
     enableWhenDebug = false
+    // Include third-party dependencies in instrumentation; default false.
+    includeDependencies = false
 }
 ```
 
@@ -128,6 +134,8 @@ stringblur {
 
     // Also encrypt debug variants when enabled; default false.
     enableWhenDebug = false
+    // Include third-party dependencies in instrumentation; default false.
+    includeDependencies = false
 }
 ```
 

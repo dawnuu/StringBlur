@@ -64,11 +64,10 @@ dependencies {
 //     whiteList = ["BuildConfig", "R", "R2"]
 //
 //     // Encryption representation and algorithms.
-//     modes = [Mode.XOR_SIMD, Mode.FAST_ROT, Mode.XOR_SHIFT]
+//     modes = [Mode.XOR, Mode.FAST_ROT, Mode.XOR_SHIFT]
 //     bytesMode = BytesMode.RANDOM
 //     minLength = 3
 //
 //     // Build variant behavior.
 //     enableWhenDebug = false
-//     skipSensitiveApi = true
 // }

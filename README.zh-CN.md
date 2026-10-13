@@ -37,7 +37,7 @@ pluginManagement {
 
 ```toml
 [versions]
-stringblur = "1.0.1"
+stringblur = "1.0.4"
 
 [plugins]
 stringblur = { id = "io.github.dawnuu.stringblur", version.ref = "stringblur" }
@@ -63,9 +63,13 @@ Groovy DSL 在 `build.gradle` 中使用 `alias(libs.plugins.stringblur)`。
 
 ```kotlin
 plugins {
-    id("io.github.dawnuu.stringblur") version "1.0.1"
+    id("io.github.dawnuu.stringblur") version "1.0.4"
 }
 ```
+
+## 升级到 1.0.4
+
+本版本包含破坏性更新。已删除的模式、配置字段、替代设置及默认插桩范围变化详见[版本说明](CHANGELOG.md)。请移除旧配置和相关 import，再执行一次 clean build。
 
 ## 配置
 
@@ -98,6 +102,8 @@ stringblur {
 
     // 是否同时对 debug variant 启用加密，默认 false。
     enableWhenDebug = false
+    // 是否将第三方依赖包含在插桩范围内，默认 false。
+    includeDependencies = false
 }
 ```
 
@@ -127,6 +133,8 @@ stringblur {
 
     // 是否同时对 debug variant 启用加密，默认 false。
     enableWhenDebug = false
+    // 是否将第三方依赖包含在插桩范围内，默认 false。
+    includeDependencies = false
 }
 ```
 
