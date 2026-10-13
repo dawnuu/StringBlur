@@ -12,6 +12,7 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
+import com.android.string.plugin.trasform.visitor.ConstantAppendRewriter
 
 /**
  * @author chancey
@@ -133,6 +134,7 @@ class StringBlurClassVisitor(
         return object : MethodNode(Opcodes.ASM9, access, name, descriptor, signature, exceptions) {
             override fun visitEnd() {
                 super.visitEnd()
+                ConstantAppendRewriter.rewrite(controller.currentClassName.orEmpty(), this)
                 accept(controller.visitMethod(access, mv, name, maxLocals))
             }
         }
