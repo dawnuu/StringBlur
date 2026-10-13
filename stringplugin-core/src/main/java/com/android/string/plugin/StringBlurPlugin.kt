@@ -5,6 +5,7 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.string.plugin.data.Constant
+import com.android.string.plugin.report.StringBlurReportService
 import com.android.string.plugin.task.StringBlurTask
 import com.android.string.plugin.trasform.StringBlurClassTransform
 import com.android.string.plugin.util.EntryNames
@@ -14,8 +15,13 @@ import com.android.string.plugin.util.ModeUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.build.event.BuildEventsListenerRegistry
+import javax.inject.Inject
 
-class StringBlurPlugin : Plugin<Project> {
+abstract class StringBlurPlugin : Plugin<Project> {
+    @get:Inject
+    abstract val buildEventsListenerRegistry: BuildEventsListenerRegistry
+
     override fun apply(target: Project) {
         target.extensions.create(Constant.PLUGIN_NAME, StringBlurExtension::class.java)
         val components =
@@ -52,14 +58,30 @@ class StringBlurPlugin : Plugin<Project> {
             }
             val reportFile = target.layout.buildDirectory
                 .file("reports/${Constant.PLUGIN_NAME}/${variant.name}.txt")
-            val reportPathString = reportFile.map { it.asFile.absolutePath }
-            val reportPathFile = reportFile.map { it.asFile }
+            val reportService = target.gradle.sharedServices.registerIfAbsent(
+                "stringblur-report:${target.path}:${variant.name}",
+                StringBlurReportService::class.java
+            ) { spec ->
+                spec.parameters.reportFile.set(reportFile)
+                spec.parameters.variantName.set(variant.name)
+                spec.parameters.modes.set(modes.joinToString(",") { it.name })
+                spec.parameters.bytesMode.set(stringblur.bytesMode.name)
+            }
+            buildEventsListenerRegistry.onTaskCompletion(reportService)
+
+            // 默认只处理当前项目，避免对所有第三方依赖类做 ASM 扫描（更快、更安全）；
+            // 需要连同依赖一起加密时显式开启 includeDependencies
+            val instrumentationScope = if (stringblur.includeDependencies) {
+                InstrumentationScope.ALL
+            } else {
+                InstrumentationScope.PROJECT
+            }
 
             variant.instrumentation.transformClassesWith(
                 StringBlurClassTransform::class.java,
-                InstrumentationScope.ALL
+                instrumentationScope
             ) { params ->
-                params.setParams(seedProvider, applicationIdProvider, stringblur, variant.name, reportPathString, modes, wrapperClass, wrapperMethodName)
+                params.setParams(seedProvider, applicationIdProvider, stringblur, variant.name, reportService, modes, wrapperClass, wrapperMethodName)
             }
 
             variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES)
@@ -69,8 +91,6 @@ class StringBlurPlugin : Plugin<Project> {
                 variant,
                 applicationIdProvider,
                 modes,
-                reportPathFile,
-                stringblur.bytesMode,
                 seedProvider,
                 wrapperClassName,
                 wrapperMethodName

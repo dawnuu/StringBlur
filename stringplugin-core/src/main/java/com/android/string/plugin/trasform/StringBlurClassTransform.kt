@@ -40,6 +40,8 @@ abstract class StringBlurClassTransform :
         nextClassVisitor: ClassVisitor
     ): ClassVisitor {
         return with(parameters.get()) {
+            val report = reportService.get().report
+            report.scanned(classContext.currentClassData.className)
             StringBlurClassVisitor(
                 nextClassVisitor,
                 wrapperClass.get(),
@@ -47,7 +49,7 @@ abstract class StringBlurClassTransform :
                 KeyDerivation.master(seed.get()),
                 bytesMode.get(),
                 modes.get(),
-                reportPath.orNull,
+                report,
                 minLength.get()
             )
         }

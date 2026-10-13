@@ -5,11 +5,13 @@ import com.android.string.plugin.StringBlurExtension
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
+import com.android.string.plugin.report.StringBlurReportService
 import com.android.string.plugin.util.ModeUtils
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 
 /**
  * @author chancey
@@ -41,8 +43,9 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     @get:Input
     abstract val variantName: Property<String>
 
-    @get:Input
-    abstract val reportPath: Property<String>
+    // 报告收集器不影响加密产物，不参与缓存指纹；文件写入由构建服务收尾负责。
+    @get:Internal
+    abstract val reportService: Property<StringBlurReportService>
 
     /** 运行时解密入口类的内部名（斜线分隔），按配置派生 */
     @get:Input
@@ -57,7 +60,7 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
         applicationId: Provider<String>,
         extension: StringBlurExtension,
         variantName: String,
-        reportPath: Provider<String>,
+        reportService: Provider<StringBlurReportService>,
         modes: List<Mode>,
         wrapperClass: Provider<String>,
         wrapperMethod: Provider<String>
@@ -68,7 +71,7 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
         this.modes.addAll(modes)
         this.minLength.set(extension.minLength.coerceAtLeast(0))
         this.variantName.set(variantName)
-        this.reportPath.set(reportPath)
+        this.reportService.set(reportService)
         this.wrapperClass.set(wrapperClass)
         this.wrapperMethod.set(wrapperMethod)
         

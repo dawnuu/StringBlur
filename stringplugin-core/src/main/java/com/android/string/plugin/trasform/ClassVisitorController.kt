@@ -24,7 +24,7 @@ class ClassVisitorController(
     private val master: IntArray,
     private val bytesMode: BytesMode,
     private val modes: List<Mode>,
-    private val reportPath: String?,
+    private val report: StringBlurReport?,
     private val minLength: Int
 ) {
     private val asmWriter = AsmWriter(wrapperClass, wrapperMethod)
@@ -154,9 +154,8 @@ class ClassVisitorController(
         mode: Mode,
         selectedBytesMode: BytesMode
     ) {
-        reportPath?.let {
-            StringBlurReport.encrypted(
-                it,
+        report?.let {
+            it.encrypted(
                 currentClassName,
                 methodName,
                 data,
@@ -167,9 +166,8 @@ class ClassVisitorController(
     }
 
     fun reportIgnored(methodName: String?, value: Any?, reason: String) {
-        reportPath?.let {
-            StringBlurReport.ignored(
-                it,
+        report?.let {
+            it.ignored(
                 currentClassName,
                 methodName,
                 value,
@@ -191,7 +189,7 @@ class ClassVisitorController(
     }
 
     fun write(data: String?, mv: MethodVisitor, methodName: String? = null) {
-        val modeIndex = selectModeIndex(data ?: "")
+        val modeIndex = selectModeIndex()
         val mode = modes[modeIndex]
         val selectedBytesMode = selectBytesMode()
         val stringBlurWrapper = ModeUtils.getEncodeImpl(mode)
@@ -211,7 +209,7 @@ class ClassVisitorController(
         }
     }
 
-    private fun selectModeIndex(content: String): Int {
+    private fun selectModeIndex(): Int {
         if (modes.size == 1) {
             return 0
         }

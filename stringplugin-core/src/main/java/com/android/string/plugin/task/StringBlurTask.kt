@@ -2,9 +2,7 @@ package com.android.string.plugin.task
 
 import com.android.build.api.variant.Variant
 import com.android.string.plugin.data.Constant
-import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
-import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.task.build.StringBlurFile
 import com.android.string.plugin.util.KeyDerivation
 import com.android.string.plugin.util.Logger
@@ -12,14 +10,12 @@ import com.android.string.plugin.util.ModeUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.util.Locale
@@ -31,50 +27,26 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
     fun injectSource() {
         val appId = applicationId.get()
         val modeList = modes.get()
-        val reportFile = reportPath.asFile.get()
 
-        StringBlurReport.init(
-            reportFile.absolutePath,
-            variantName.get(),
-            modeList.joinToString(",") { it.name },
-            bytesMode.get().name
-        )
-
+        // This task owns its generated source directory. Clear previous algorithms,
+        // wrapper names and packages when configuration changes, not just old wrappers.
+        val outputDir = dir.get().asFile
+        check(outputDir.deleteRecursively()) { "Cannot clear generated StringBlur sources: $outputDir" }
         val child = Constant.PLUGIN_CLASS_PACKAGE.format(appId).replace(".", "/")
-        val path = File(dir.get().asFile, child)
+        val path = File(outputDir, child)
         Logger.log("路径$path")
-        if (!path.exists()) {
-            path.mkdirs()
-        }
+        check(path.mkdirs() || path.isDirectory) { "Cannot create generated StringBlur sources: $path" }
         modeList.forEach { mode ->
             ModeUtils.getEncodeImplFile(mode).create(path, appId)
         }
-        // 入口名按配置派生，配置变化会生成新名字；清掉旧包装类避免残留编译进 APK
-        path.listFiles { file ->
-            file.isFile &&
-                file.name != "${wrapperClassName.get()}.java" &&
-                (file.name.startsWith("Sb") || file.name == "${Constant.PLUGIN_CLASS_NAME}.java")
-        }?.forEach { it.delete() }
         StringBlurFile(KeyDerivation.master(seed.get())).create(path, appId, modeList, wrapperClassName.get(), wrapperMethodName.get())
-
-        StringBlurReport.generateSummary(reportFile.absolutePath)
-        Logger.log("StringBlur performance report generated: ${reportFile.absolutePath}")
     }
 
     @get:Input
     abstract val applicationId: Property<String>
 
-    @get:Input
-    abstract val variantName: Property<String>
-
-    @get:Input
-    abstract val bytesMode: Property<BytesMode>
-
     @get:OutputDirectory
     abstract val dir: DirectoryProperty
-
-    @get:OutputFile
-    abstract val reportPath: RegularFileProperty
 
     @get:Input
     abstract val modes: ListProperty<Mode>
@@ -98,8 +70,6 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
             variant: Variant,
             applicationId: Provider<String>,
             modes: List<Mode>,
-            reportFileProvider: Provider<java.io.File>,
-            bytesMode: BytesMode,
             seed: Provider<String>,
             wrapperClassName: Provider<String>,
             wrapperMethodName: Provider<String>
@@ -108,9 +78,6 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
             val taskName = "generate${Constant.PLUGIN_CLASS_NAME}$name"
             val provider = project.tasks.register(taskName, StringBlurTask::class.java) { task ->
                 task.applicationId.set(applicationId)
-                task.variantName.set(variant.name)
-                task.bytesMode.set(bytesMode)
-                task.reportPath.fileProvider(reportFileProvider)
                 task.modes.addAll(modes)
                 task.seed.set(seed)
                 task.wrapperClassName.set(wrapperClassName)

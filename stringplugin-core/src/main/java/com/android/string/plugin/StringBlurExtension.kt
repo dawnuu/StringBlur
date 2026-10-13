@@ -16,5 +16,6 @@ abstract class StringBlurExtension {
     var bytesMode: BytesMode = BytesMode.STRING
     var minLength: Int = 0
     var enableWhenDebug: Boolean = false // debug模式下是否启用加密，默认false
+    var includeDependencies: Boolean = false // 是否连同第三方依赖一起加密，默认false（仅处理当前项目）
 
 }
