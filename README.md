@@ -77,14 +77,11 @@ import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 
 stringblur {
-    // Encryption key. Use a string, or an integer for a random key length.
-    // Omit this line to resolve the key in this order:
-    // 1. gradle.properties or -Pstringblur.key=your-key
-    // 2. Environment variable STRINGBLUR_KEY=your-key
-    // 3. Root local.properties: stringblur.key=your-key
-    key = "my-project-key-2024"
     // Master switch; disabled by default.
     enable = true
+    // Optional salt that makes this project's output different; changing it changes all generated output.
+    // Not a secret, so it is fine to commit. Default empty.
+    seed = "my-project-seed"
 
     // Empty list: current applicationId/namespace; null: all classes;
     // non-empty list: add these package prefixes to the current scope.
@@ -112,12 +109,6 @@ import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 
 stringblur {
-    // Encryption key. Use a string, or an integer for a random key length.
-    // Omit this line to resolve the key in this order:
-    // 1. gradle.properties or -Pstringblur.key=your-key
-    // 2. Environment variable STRINGBLUR_KEY=your-key
-    // 3. Root local.properties: stringblur.key=your-key
-    key = "my-project-key-2024"
     // Master switch; disabled by default.
     enable = true
 
@@ -142,8 +133,8 @@ stringblur {
 
 ## Encryption modes
 
-- `Mode.DEFAULT`: key-based byte addition/subtraction; the compatibility-oriented default.
-- `Mode.XOR`: basic key-based XOR transformation.
+- `Mode.DEFAULT`: byte addition/subtraction; the compatibility-oriented default.
+- `Mode.XOR`: basic XOR transformation.
 - `Mode.XOR_SHIFT`: combines XOR and byte shifting for stronger protection.
 - `Mode.XOR_SIMD`: batch XOR optimized for medium and long strings and performance-sensitive code.
 - `Mode.FAST_ROT`: fast bit rotation, suitable for frequent short strings.
@@ -153,6 +144,13 @@ stringblur {
 - `BytesMode.STRING`: stores encrypted data as a string constant.
 - `BytesMode.BYTES`: stores encrypted data as a byte array.
 - `BytesMode.RANDOM`: randomly chooses `STRING` or `BYTES` for each string.
+
+## Security notes
+
+StringBlur is string obfuscation, not strong encryption. The decryption logic and the material it needs ship inside the app, so anyone who analyzes the APK can recover the strings. It raises the effort needed to read them (no plain strings in the dex, a different key per string, no generic one-click decryptor), but it cannot stop a determined analyst, and it cannot stop hooking the app at runtime.
+
+- Do not rely on it to protect secrets such as API secrets or signing keys. Keep those on a server and hand the app short-lived tokens instead.
+- `seed` is not a secret. It only makes your project's output differ from other projects'.
 
 ## Related project
 

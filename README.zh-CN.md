@@ -76,14 +76,11 @@ import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 
 stringblur {
-    // 加密密钥：支持字符串，也支持用整数指定随机密钥长度。
-    // 省略此行时按以下顺序读取：
-    // 1. gradle.properties 中的 stringblur.key，或 -Pstringblur.key=your-key
-    // 2. 环境变量 STRINGBLUR_KEY=your-key
-    // 3. 项目根目录 local.properties 中的 stringblur.key=your-key
-    key = "my-project-key-2024"
     // 加密总开关，默认关闭。
     enable = true
+    // 可选的盐，让本项目的生成内容与别人不同，修改后所有生成内容都会变化；
+    // 它不是密钥，无需保密，可以提交进版本库，默认为空。
+    seed = "my-project-seed"
 
     // 空列表：当前 applicationId/namespace；null：全部 class；
     // 非空列表：在当前范围上追加这些包名前缀。
@@ -111,12 +108,6 @@ import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 
 stringblur {
-    // 加密密钥：支持字符串，也支持用整数指定随机密钥长度。
-    // 省略此行时按以下顺序读取：
-    // 1. gradle.properties 中的 stringblur.key，或 -Pstringblur.key=your-key
-    // 2. 环境变量 STRINGBLUR_KEY=your-key
-    // 3. 项目根目录 local.properties 中的 stringblur.key=your-key
-    key = "my-project-key-2024"
     // 加密总开关，默认关闭。
     enable = true
 
@@ -141,8 +132,8 @@ stringblur {
 
 ## 加密方式
 
-- `Mode.DEFAULT`：按 key 对字节做加减变换，兼容性优先的默认算法。
-- `Mode.XOR`：按 key 做基础异或变换。
+- `Mode.DEFAULT`：对字节做加减变换，兼容性优先的默认算法。
+- `Mode.XOR`：基础异或变换。
 - `Mode.XOR_SHIFT`：组合 XOR 与字节位移，安全性更强。
 - `Mode.XOR_SIMD`：针对中长字符串和性能敏感场景优化的批量 XOR。
 - `Mode.FAST_ROT`：快速位旋转，适合高频短字符串。
@@ -152,6 +143,13 @@ stringblur {
 - `BytesMode.STRING`：将密文保存为字符串常量。
 - `BytesMode.BYTES`：将密文保存为 byte array。
 - `BytesMode.RANDOM`：每个字符串随机选择 `STRING` 或 `BYTES`。
+
+## 安全说明
+
+StringBlur 是字符串混淆，不是强加密。解密逻辑和所需的材料都随 App 一起发布，任何人分析 APK 都有可能还原字符串。它提高的是读取字符串的成本（dex 里没有明文字符串、每个字符串的 key 各不相同、没有通用的一键解密工具），但挡不住有决心的分析者，也挡不住在运行时对 App 做 hook。
+
+- 不要依赖它保护 API secret、签名密钥这类机密，这类内容应放在服务端，由服务端给 App 下发短期 token。
+- `seed` 不是密钥，它只是让你的项目产物与其他项目不同。
 
 ## 相关项目
 

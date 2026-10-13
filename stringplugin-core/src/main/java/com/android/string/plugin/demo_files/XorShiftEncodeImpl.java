@@ -2,6 +2,8 @@ package com.android.string.plugin.demo_files;
 
 import com.android.string.plugin.IString;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * XOR与位移复合加密算法实现
  * 先进行XOR操作再进行位移变换，提供更高的安全性
@@ -13,7 +15,7 @@ import com.android.string.plugin.IString;
 public final class XorShiftEncodeImpl implements IString {
     @Override
     public byte[] encrypt(byte[] data, String key) {
-        return shift(xor(data, key.getBytes()), key.getBytes(), 1);
+        return shift(xor(data, key.getBytes(StandardCharsets.UTF_8)), key.getBytes(StandardCharsets.UTF_8), 1);
     }
 
     @Override

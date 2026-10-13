@@ -8,6 +8,7 @@ import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
 import com.android.string.plugin.trasform.visitor.InitMethodVisitor
 import com.android.string.plugin.trasform.visitor.NormalMethodVisitor
 import com.android.string.plugin.util.AsmWriter
+import com.android.string.plugin.util.KeyDerivation
 import com.android.string.plugin.util.ModeUtils
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -20,14 +21,20 @@ import kotlin.random.Random
 class ClassVisitorController(
     private val wrapperClass: String,
     private val wrapperMethod: String,
-    private val key: String,
+    private val master: IntArray,
     private val bytesMode: BytesMode,
     private val modes: List<Mode>,
     private val reportPath: String?,
     private val minLength: Int
 ) {
     private val asmWriter = AsmWriter(wrapperClass, wrapperMethod)
+    // 每个类用各自的种子，避免不同类里第 n 个字符串得到相同的 tag
+    private var random = Random(master.contentHashCode())
     var currentClassName: String? = null
+        set(value) {
+            field = value
+            random = Random(master.contentHashCode() * 31 + (value?.hashCode() ?: 0))
+        }
 
     // 类级 @KeepString / @EncryptString（由 StringBlurClassVisitor.visitAnnotation 设置）
     var classKeep: Boolean = false
@@ -38,7 +45,6 @@ class ClassVisitorController(
     val finalFields = mutableListOf<StringFiled>()
     private val fields = mutableListOf<StringFiled>()
     private var isClInitExists = false
-    private val random = Random(key.hashCode())
 
     fun markFieldAnnotation(name: String, keep: Boolean, force: Boolean) {
         (staticFinalFields + staticFields + finalFields + fields)
@@ -219,8 +225,9 @@ class ClassVisitorController(
         modeIndex: Int,
         mv: MethodVisitor
     ) {
-        val encodeText = stringBlurWrapper.encryptString(data, key)
-        asmWriter.write(encodeText, key, modeIndex, mv)
+        val tag = random.nextInt()
+        val encodeText = stringBlurWrapper.encryptString(data, KeyDerivation.derive(master, tag))
+        asmWriter.write(encodeText, tag, modeIndex, mv)
     }
 
     private fun writeByBytes(
@@ -229,7 +236,8 @@ class ClassVisitorController(
         modeIndex: Int,
         mv: MethodVisitor
     ) {
-        val encodeText = stringBlurWrapper.encryptBytes(data, key)
-        asmWriter.write(encodeText, key, modeIndex, mv)
+        val tag = random.nextInt()
+        val encodeText = stringBlurWrapper.encryptBytes(data, KeyDerivation.derive(master, tag))
+        asmWriter.write(encodeText, tag, modeIndex, mv)
     }
 }

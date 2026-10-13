@@ -6,6 +6,7 @@ import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.task.build.StringBlurFile
+import com.android.string.plugin.util.KeyDerivation
 import com.android.string.plugin.util.Logger
 import com.android.string.plugin.util.ModeUtils
 import org.gradle.api.DefaultTask
@@ -46,7 +47,7 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
             path.mkdirs()
         }
         modeList.forEach { mode ->
-            ModeUtils.getEncodeImplFile(mode).create(path, appId, mode)
+            ModeUtils.getEncodeImplFile(mode).create(path, appId)
         }
         // 入口名按配置派生，配置变化会生成新名字；清掉旧包装类避免残留编译进 APK
         path.listFiles { file ->
@@ -54,7 +55,7 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
                 file.name != "${wrapperClassName.get()}.java" &&
                 (file.name.startsWith("Sb") || file.name == "${Constant.PLUGIN_CLASS_NAME}.java")
         }?.forEach { it.delete() }
-        StringBlurFile().create(path, appId, modeList, wrapperClassName.get(), wrapperMethodName.get())
+        StringBlurFile(KeyDerivation.master(seed.get())).create(path, appId, modeList, wrapperClassName.get(), wrapperMethodName.get())
 
         StringBlurReport.generateSummary(reportFile.absolutePath)
         Logger.log("StringBlur performance report generated: ${reportFile.absolutePath}")
@@ -79,6 +80,9 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
     abstract val modes: ListProperty<Mode>
 
     @get:Input
+    abstract val seed: Property<String>
+
+    @get:Input
     abstract val wrapperClassName: Property<String>
 
     @get:Input
@@ -96,6 +100,7 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
             modes: List<Mode>,
             reportFileProvider: Provider<java.io.File>,
             bytesMode: BytesMode,
+            seed: Provider<String>,
             wrapperClassName: Provider<String>,
             wrapperMethodName: Provider<String>
         ) {
@@ -107,6 +112,7 @@ abstract class StringBlurTask @Inject constructor() : DefaultTask() {
                 task.bytesMode.set(bytesMode)
                 task.reportPath.fileProvider(reportFileProvider)
                 task.modes.addAll(modes)
+                task.seed.set(seed)
                 task.wrapperClassName.set(wrapperClassName)
                 task.wrapperMethodName.set(wrapperMethodName)
             }

@@ -5,7 +5,7 @@ import java.security.MessageDigest
 /**
  * 从配置派生运行时解密入口的类名与方法名。
  * 同一配置下名字保持稳定（增量构建与构建缓存不受影响），
- * 不同项目、key、variant、算法组合的入口互不相同，
+ * 不同项目、variant、算法组合的入口互不相同，
  * 使针对固定入口 <appId>.stringblur.StringBlur.decrypt 的通用 hook 脚本失效。
  *
  * @author chancey

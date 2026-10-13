@@ -14,6 +14,13 @@ configurations.all {
     }
 }
 
+// 算法源码（demo_files）同时作为资源打进插件 jar，构建时复制进 App，保证加解密实现只有一份
+processResources {
+    from('src/main/java') {
+        include 'com/android/string/plugin/demo_files/*.java'
+    }
+}
+
 dependencies {
     implementation gradleApi()
     implementation localGroovy()

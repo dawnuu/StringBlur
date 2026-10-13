@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.string.plugin.trasform.parameters.StringBlurInstrumentationParameters
+import com.android.string.plugin.util.KeyDerivation
 import org.objectweb.asm.ClassVisitor
 
 abstract class StringBlurClassTransform :
@@ -43,7 +44,7 @@ abstract class StringBlurClassTransform :
                 nextClassVisitor,
                 wrapperClass.get(),
                 wrapperMethod.get(),
-                key.get(),
+                KeyDerivation.master(seed.get()),
                 bytesMode.get(),
                 modes.get(),
                 reportPath.orNull,

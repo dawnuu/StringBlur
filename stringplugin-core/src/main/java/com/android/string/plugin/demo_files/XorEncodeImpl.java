@@ -2,6 +2,8 @@ package com.android.string.plugin.demo_files;
 
 import com.android.string.plugin.IString;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author chancey
  * @date 2025/6/29
@@ -9,7 +11,7 @@ import com.android.string.plugin.IString;
 public class XorEncodeImpl implements IString {
     @Override
     public byte[] encrypt(byte[] data, String key) {
-        return xor(data, key.getBytes());
+        return xor(data, key.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

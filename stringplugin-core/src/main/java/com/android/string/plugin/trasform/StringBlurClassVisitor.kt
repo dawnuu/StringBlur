@@ -20,13 +20,13 @@ class StringBlurClassVisitor(
     cv: ClassVisitor,
     wrapperClass: String,
     wrapperMethod: String,
-    key: String,
+    master: IntArray,
     bytesMode: BytesMode,
     modes: List<Mode>,
     reportPath: String?,
     minLength: Int,
 ) : ClassVisitor(Opcodes.ASM9, cv) {
-    private val controller = ClassVisitorController(wrapperClass, wrapperMethod, key, bytesMode, modes, reportPath, minLength)
+    private val controller = ClassVisitorController(wrapperClass, wrapperMethod, master, bytesMode, modes, reportPath, minLength)
 
     override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor {
         when (descriptor) {

@@ -30,7 +30,7 @@ class StringConstantValueTest {
             outputWriter,
             "test/StringBlur",
             "decrypt",
-            "test-key",
+            com.android.string.plugin.util.KeyDerivation.master("test-key"),
             BytesMode.STRING,
             listOf(Mode.DEFAULT),
             null,

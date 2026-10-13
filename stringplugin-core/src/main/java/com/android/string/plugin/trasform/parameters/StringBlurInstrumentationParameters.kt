@@ -6,7 +6,6 @@ import com.android.string.plugin.data.Constant
 import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.util.ModeUtils
-import com.android.string.plugin.util.generator.Generator
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -18,7 +17,8 @@ import org.gradle.api.tasks.Input
  **/
 abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     @get:Input
-    abstract val key: Property<String>
+    /** 由配置稳定派生的种子，运行时主密钥材料由它得出 */
+    abstract val seed: Property<String>
 
     @get:Input
     abstract val bytesMode: Property<BytesMode>
@@ -53,7 +53,7 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     abstract val wrapperMethod: Property<String>
 
     fun setParams(
-        generator: Generator,
+        seed: Provider<String>,
         applicationId: Provider<String>,
         extension: StringBlurExtension,
         variantName: String,
@@ -62,7 +62,7 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
         wrapperClass: Provider<String>,
         wrapperMethod: Provider<String>
     ) {
-        this.key.set(generator.generate())
+        this.seed.set(seed)
         this.bytesMode.set(extension.bytesMode)
         this.applicationId.set(applicationId)
         this.modes.addAll(modes)

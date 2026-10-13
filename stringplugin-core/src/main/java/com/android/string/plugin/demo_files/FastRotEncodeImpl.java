@@ -28,7 +28,7 @@ public final class FastRotEncodeImpl implements IString {
     public byte[] decrypt(byte[] data, byte[] key) {
         if (!overflow(data) || key == null) return data;
         
-        int rotation = Math.abs(new String(key).hashCode()) % 7 + 1;
+        int rotation = Math.abs(new String(key, java.nio.charset.StandardCharsets.UTF_8).hashCode()) % 7 + 1;
         
         for (int i = 0; i < data.length; i++) {
             data[i] = rotateRight(data[i], rotation);

@@ -10,36 +10,28 @@ import org.objectweb.asm.Type
  **/
 class AsmWriter(private val className: String, private val methodName: String = "decrypt") {
 
-    fun write(data: String, key: String, mv: MethodVisitor) {
-        write(data, key, 0, mv)
-    }
-
-    fun write(data: String, key: String, modeIndex: Int, mv: MethodVisitor) {
+    fun write(data: String, tag: Int, modeIndex: Int, mv: MethodVisitor) {
         mv.visitLdcInsn(data)
-        mv.visitLdcInsn(key)
+        write(tag, mv)
         write(modeIndex, mv)
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC,
             className,
             methodName,
-            "(Ljava/lang/String;Ljava/lang/String;I)Ljava/lang/String;",
+            "(Ljava/lang/String;II)Ljava/lang/String;",
             false
         )
     }
 
-    fun write(data: ByteArray, key: String, mv: MethodVisitor) {
-        write(data, key, 0, mv)
-    }
-
-    fun write(data: ByteArray, key: String, modeIndex: Int, mv: MethodVisitor) {
+    fun write(data: ByteArray, tag: Int, modeIndex: Int, mv: MethodVisitor) {
         write(data, mv)
-        write(key.toByteArray(), mv)
+        write(tag, mv)
         write(modeIndex, mv)
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC,
             className,
             methodName,
-            "([B[BI)Ljava/lang/String;",
+            "([BII)Ljava/lang/String;",
             false
         )
     }
@@ -61,7 +53,7 @@ class AsmWriter(private val className: String, private val methodName: String = 
         when (value) {
             in -1..5 -> mv.visitInsn(Opcodes.ICONST_0 + value)
             in Byte.MIN_VALUE..Byte.MAX_VALUE -> mv.visitIntInsn(Opcodes.BIPUSH, value)
-            in Short.MAX_VALUE..Short.MAX_VALUE -> mv.visitIntInsn(Opcodes.SIPUSH, value)
+            in Short.MIN_VALUE..Short.MAX_VALUE -> mv.visitIntInsn(Opcodes.SIPUSH, value)
             else -> mv.visitLdcInsn(value)
         }
     }

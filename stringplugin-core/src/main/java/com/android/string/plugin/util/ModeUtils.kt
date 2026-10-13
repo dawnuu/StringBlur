@@ -4,8 +4,7 @@ import com.android.string.plugin.IString
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.demo_files.*
 import com.android.string.plugin.mode.Mode
-import com.android.string.plugin.task.BaseFile
-import com.android.string.plugin.task.build.*
+import com.android.string.plugin.task.EncodeImplFile
 
 /**
  * @author chancey
@@ -51,13 +50,5 @@ object ModeUtils {
         return getEncodeImpl(Mode.valueOf(modeName))
     }
 
-    fun getEncodeImplFile(mode: Mode): BaseFile {
-        return when (mode) {
-            Mode.DEFAULT -> DefaultEncodeImplFile()
-            Mode.XOR -> XorEncodeImplFile()
-            Mode.XOR_SHIFT -> XorShiftEncodeImplFile()
-            Mode.XOR_SIMD -> XorSimdEncodeImplFile() // 使用专用SIMD文件生成器
-            Mode.FAST_ROT -> FastRotEncodeImplFile()   // 使用专用旋转文件生成器
-        }
-    }
+    fun getEncodeImplFile(mode: Mode): EncodeImplFile = EncodeImplFile(mode)
 }

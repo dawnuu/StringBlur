@@ -50,7 +50,7 @@ class StringConcatRewriterTest {
             outputWriter,
             "test/StringBlur",
             "decrypt",
-            "test-key",
+            com.android.string.plugin.util.KeyDerivation.master("test-key"),
             com.android.string.plugin.mode.BytesMode.STRING,
             listOf(com.android.string.plugin.mode.Mode.DEFAULT),
             null,

@@ -57,9 +57,6 @@ dependencies {
 // import com.android.string.plugin.mode.Mode
 //
 // stringblur {
-//     // Or omit this line and configure stringblur.key in local.properties,
-//     // gradle.properties/-P, or the STRINGBLUR_KEY environment variable.
-//     key = "my-project-key-2024"
 //     enable = true
 //
 //     // Scope and exclusions.

@@ -8,8 +8,8 @@ import com.android.string.plugin.mode.Mode
  * @date   2023/9/5   16:07
  **/
 abstract class StringBlurExtension {
-    var key: Any? = null
     var enable: Boolean = false
+    var seed: String = "" // 可选的盐，改动会让产物整体变化；不是密钥，无需保密
     var whiteList: List<String> = emptyList()
     var encodePackages: List<String>? = emptyList()
     var modes: List<Mode> = listOf(Mode.DEFAULT)
