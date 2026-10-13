@@ -25,7 +25,7 @@ class ClinitMethodVisitor(
             if (it.keep) {
                 return@forEach
             }
-            if (!it.force && !controller.overflow(it.value)) {
+            if (!it.force && !controller.shouldEncrypt(it.value)) {
                 return@forEach
             }
             controller.write(it.value, mv, methodName)

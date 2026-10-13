@@ -40,15 +40,14 @@ object Constant {
      */
     const val XOR_SHIFT_IMPL_CLASS_NAME = "XorShiftEncodeImpl"
 
-    /**
-     * SIMD优化的XOR加解密实现类类名
-     */
-    const val XOR_SIMD_IMPL_CLASS_NAME = "XorSimdEncodeImpl"
 
     /**
      * 快速旋转加解密实现类类名
      */
     const val FAST_ROT_IMPL_CLASS_NAME = "FastRotEncodeImpl"
+
+    const val XOR_CHAIN_IMPL_CLASS_NAME = "XorChainEncodeImpl"
+    const val LCG_STREAM_IMPL_CLASS_NAME = "LcgStreamEncodeImpl"
 
     /**
      * 注解：范围内字符串保持明文
@@ -71,6 +70,7 @@ object Constant {
     const val DEFAULT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$DEFAULT_IMPL_CLASS_NAME"
     const val XOR_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_IMPL_CLASS_NAME"
     const val XOR_SHIFT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_SHIFT_IMPL_CLASS_NAME"
-    const val XOR_SIMD_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_SIMD_IMPL_CLASS_NAME"
     const val FAST_ROT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$FAST_ROT_IMPL_CLASS_NAME"
+    const val XOR_CHAIN_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_CHAIN_IMPL_CLASS_NAME"
+    const val LCG_STREAM_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$LCG_STREAM_IMPL_CLASS_NAME"
 }

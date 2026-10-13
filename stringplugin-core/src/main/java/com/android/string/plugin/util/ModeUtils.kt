@@ -21,8 +21,9 @@ object ModeUtils {
             Mode.DEFAULT -> Constant.DEFAULT_IMPL_CLASS_NAME
             Mode.XOR -> Constant.XOR_IMPL_CLASS_NAME
             Mode.XOR_SHIFT -> Constant.XOR_SHIFT_IMPL_CLASS_NAME
-            Mode.XOR_SIMD -> Constant.XOR_SIMD_IMPL_CLASS_NAME
             Mode.FAST_ROT -> Constant.FAST_ROT_IMPL_CLASS_NAME
+            Mode.XOR_CHAIN -> Constant.XOR_CHAIN_IMPL_CLASS_NAME
+            Mode.LCG_STREAM -> Constant.LCG_STREAM_IMPL_CLASS_NAME
         }
     }
 
@@ -31,8 +32,9 @@ object ModeUtils {
             Mode.DEFAULT -> Constant.DEFAULT_IMPL_CLASS_FILE_PATH
             Mode.XOR -> Constant.XOR_IMPL_CLASS_FILE_PATH
             Mode.XOR_SHIFT -> Constant.XOR_SHIFT_IMPL_CLASS_FILE_PATH
-            Mode.XOR_SIMD -> Constant.XOR_SIMD_IMPL_CLASS_FILE_PATH
             Mode.FAST_ROT -> Constant.FAST_ROT_IMPL_CLASS_FILE_PATH
+            Mode.XOR_CHAIN -> Constant.XOR_CHAIN_IMPL_CLASS_FILE_PATH
+            Mode.LCG_STREAM -> Constant.LCG_STREAM_IMPL_CLASS_FILE_PATH
         }.format(applicationId)
     }
 
@@ -41,8 +43,9 @@ object ModeUtils {
             Mode.DEFAULT -> DefaultEncodeImpl()
             Mode.XOR -> XorEncodeImpl()
             Mode.XOR_SHIFT -> XorShiftEncodeImpl()
-            Mode.XOR_SIMD -> XorSimdEncodeImpl()
             Mode.FAST_ROT -> FastRotEncodeImpl()
+            Mode.XOR_CHAIN -> XorChainEncodeImpl()
+            Mode.LCG_STREAM -> LcgStreamEncodeImpl()
         }
     }
 

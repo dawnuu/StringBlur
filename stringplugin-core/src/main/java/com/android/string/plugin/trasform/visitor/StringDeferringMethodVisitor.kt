@@ -65,7 +65,7 @@ abstract class StringDeferringMethodVisitor(
 
     override fun visitLdcInsn(value: Any?) {
         flush()
-        if (value is String && !value.isEmpty() && (controller.overflow(value) || forceActive())) {
+        if (value is String && !value.isEmpty() && (controller.shouldEncrypt(value) || forceActive())) {
             pending = value
             pendingKeep = keepActive()
         } else {

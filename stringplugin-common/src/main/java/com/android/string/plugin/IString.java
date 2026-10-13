@@ -25,7 +25,7 @@ public interface IString {
         return decryptBytes(data.getBytes(StandardCharsets.UTF_8), key.getBytes(StandardCharsets.UTF_8));
     }
 
-    default boolean overflow(byte[] data) {
+    default boolean hasContent(byte[] data) {
         return data != null && data.length != 0;
     }
 

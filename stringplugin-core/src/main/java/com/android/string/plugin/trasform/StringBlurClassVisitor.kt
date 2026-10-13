@@ -88,7 +88,7 @@ class StringBlurClassVisitor(
                     value is String &&
                     !controller.classKeep &&
                     !controller.isKeepStaticField(name) &&
-                    (controller.isForceStaticField(name) || controller.overflow(value))
+                    (controller.isForceStaticField(name) || controller.shouldEncrypt(value))
                 val fieldVisitor = emitField(
                     access,
                     name,

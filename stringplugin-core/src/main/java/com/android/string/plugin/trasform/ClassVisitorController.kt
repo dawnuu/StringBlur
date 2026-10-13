@@ -109,7 +109,7 @@ class ClassVisitorController(
             if (it.keep) {
                 return@forEach
             }
-            if (!it.force && !overflow(it.value)) {
+            if (!it.force && !shouldEncrypt(it.value)) {
                 return@forEach
             }
             write(it.value, mv)
@@ -143,9 +143,9 @@ class ClassVisitorController(
     }
 
 
-    fun overflow(data: String?): Boolean {
+    fun shouldEncrypt(data: String?): Boolean {
         return data != null && ModeUtils.getEncodeImpl(modes.first())
-            .overflow(data.toByteArray()) && data.length >= minLength
+            .hasContent(data.toByteArray()) && data.length >= minLength
     }
 
     fun reportEncrypted(
@@ -178,7 +178,7 @@ class ClassVisitorController(
 
     fun reportIgnoredLdc(methodName: String?, value: Any?) {
         if (value is String && !ModeUtils.getEncodeImpl(modes.first())
-                .overflow(value.toByteArray())
+                .hasContent(value.toByteArray())
         ) {
             reportIgnored(methodName, value, "emptyString")
         } else if (value is String && value.length < minLength) {

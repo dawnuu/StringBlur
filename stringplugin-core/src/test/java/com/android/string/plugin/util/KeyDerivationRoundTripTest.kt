@@ -14,7 +14,7 @@ import javax.tools.ToolProvider
 class KeyDerivationRoundTripTest {
 
     private val master = KeyDerivation.master("test-seed|debug|com.example|XOR")
-    private val samples = listOf("a", "https://example.com/api", "中文字符串 with symbols !@#%", "x".repeat(300))
+    private val samples = listOf("", "a", "https://example.com/api", "中文字符串🔑 with symbols !@#%", "x".repeat(4096))
     private val tags = listOf(0, 1, -1, 42, 12345, Int.MAX_VALUE, Int.MIN_VALUE, 0x7fff0001, -0x1234567)
 
     @Test
@@ -30,7 +30,7 @@ class KeyDerivationRoundTripTest {
 
     @Test
     fun generatedRuntimeClassMatchesBuildTimeEncryption() {
-        val modes = listOf(Mode.DEFAULT, Mode.XOR, Mode.XOR_SHIFT, Mode.XOR_SIMD, Mode.FAST_ROT)
+        val modes = Mode.values().toList()
         val appId = "test.app"
         val dir = Files.createTempDirectory("stringblur-roundtrip").toFile()
         try {
