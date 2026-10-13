@@ -3,14 +3,12 @@ package com.android.string.plugin.trasform
 import com.android.string.plugin.field.StringFiled
 import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
-import com.android.string.plugin.mode.SelectionStrategy
 import com.android.string.plugin.report.StringBlurReport
 import com.android.string.plugin.trasform.visitor.ClinitMethodVisitor
 import com.android.string.plugin.trasform.visitor.InitMethodVisitor
 import com.android.string.plugin.trasform.visitor.NormalMethodVisitor
 import com.android.string.plugin.util.AsmWriter
 import com.android.string.plugin.util.ModeUtils
-import com.android.string.plugin.util.SmartAlgorithmSelector
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import kotlin.random.Random
@@ -26,12 +24,8 @@ class ClassVisitorController(
     private val bytesMode: BytesMode,
     private val modes: List<Mode>,
     private val reportPath: String?,
-    private val minLength: Int,
-    private val selectionStrategy: SelectionStrategy = SelectionStrategy.RANDOM,
-    private val performanceWeight: Double = 0.5,
-    private val securityWeight: Double = 0.5
+    private val minLength: Int
 ) {
-    private val smartSelector = SmartAlgorithmSelector()
     private val asmWriter = AsmWriter(wrapperClass, wrapperMethod)
     var currentClassName: String? = null
 
@@ -216,16 +210,7 @@ class ClassVisitorController(
             return 0
         }
 
-        // 使用智能选择器选择最佳算法
-        val selectedMode = smartSelector.selectBestAlgorithm(
-            content = content,
-            modes = modes,
-            strategy = selectionStrategy,
-            performanceWeight = performanceWeight,
-            securityWeight = securityWeight
-        )
-
-        return modes.indexOf(selectedMode).takeIf { it >= 0 } ?: random.nextInt(modes.size)
+        return random.nextInt(modes.size)
     }
 
     private fun writeByString(

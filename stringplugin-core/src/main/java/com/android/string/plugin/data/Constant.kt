@@ -36,16 +36,6 @@ object Constant {
     const val XOR_IMPL_CLASS_NAME = "XorEncodeImpl"
 
     /**
-     * reverse加解密实现类类名
-     */
-    const val REVERSE_IMPL_CLASS_NAME = "ReverseEncodeImpl"
-
-    /**
-     * shift加解密实现类类名
-     */
-    const val SHIFT_IMPL_CLASS_NAME = "ShiftEncodeImpl"
-
-    /**
      * xor shift加解密实现类类名
      */
     const val XOR_SHIFT_IMPL_CLASS_NAME = "XorShiftEncodeImpl"
@@ -80,8 +70,6 @@ object Constant {
      */
     const val DEFAULT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$DEFAULT_IMPL_CLASS_NAME"
     const val XOR_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_IMPL_CLASS_NAME"
-    const val REVERSE_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$REVERSE_IMPL_CLASS_NAME"
-    const val SHIFT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$SHIFT_IMPL_CLASS_NAME"
     const val XOR_SHIFT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_SHIFT_IMPL_CLASS_NAME"
     const val XOR_SIMD_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$XOR_SIMD_IMPL_CLASS_NAME"
     const val FAST_ROT_IMPL_CLASS_FILE_PATH = "$PLUGIN_CLASS_PACKAGE.$FAST_ROT_IMPL_CLASS_NAME"

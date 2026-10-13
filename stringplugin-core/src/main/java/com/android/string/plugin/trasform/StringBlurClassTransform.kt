@@ -47,10 +47,7 @@ abstract class StringBlurClassTransform :
                 bytesMode.get(),
                 modes.get(),
                 reportPath.orNull,
-                minLength.get(),
-                selectionStrategy.get(),
-                performanceWeight.get(),
-                securityWeight.get()
+                minLength.get()
             )
         }
     }

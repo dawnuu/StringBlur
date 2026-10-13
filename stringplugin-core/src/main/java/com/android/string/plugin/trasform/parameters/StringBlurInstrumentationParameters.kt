@@ -5,7 +5,6 @@ import com.android.string.plugin.StringBlurExtension
 import com.android.string.plugin.data.Constant
 import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
-import com.android.string.plugin.mode.SelectionStrategy
 import com.android.string.plugin.util.ModeUtils
 import com.android.string.plugin.util.generator.Generator
 import org.gradle.api.provider.ListProperty
@@ -53,15 +52,6 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
     @get:Input
     abstract val wrapperMethod: Property<String>
 
-    @get:Input
-    abstract val selectionStrategy: Property<SelectionStrategy>
-
-    @get:Input
-    abstract val performanceWeight: Property<Double>
-
-    @get:Input
-    abstract val securityWeight: Property<Double>
-
     fun setParams(
         generator: Generator,
         applicationId: Provider<String>,
@@ -81,9 +71,6 @@ abstract class StringBlurInstrumentationParameters : InstrumentationParameters {
         this.reportPath.set(reportPath)
         this.wrapperClass.set(wrapperClass)
         this.wrapperMethod.set(wrapperMethod)
-        this.selectionStrategy.set(extension.selectionStrategy)
-        this.performanceWeight.set(extension.performanceWeight)
-        this.securityWeight.set(extension.securityWeight)
         
         this.whiteList.addAll(extension.whiteList)
         this.whiteList.add("BuildConfig")

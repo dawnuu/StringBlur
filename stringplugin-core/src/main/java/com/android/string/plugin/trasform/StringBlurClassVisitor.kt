@@ -4,7 +4,6 @@ import com.android.string.plugin.data.Constant
 import com.android.string.plugin.field.StringFiled
 import com.android.string.plugin.mode.Mode
 import com.android.string.plugin.mode.BytesMode
-import com.android.string.plugin.mode.SelectionStrategy
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -26,11 +25,8 @@ class StringBlurClassVisitor(
     modes: List<Mode>,
     reportPath: String?,
     minLength: Int,
-    selectionStrategy: SelectionStrategy,
-    performanceWeight: Double,
-    securityWeight: Double,
 ) : ClassVisitor(Opcodes.ASM9, cv) {
-    private val controller = ClassVisitorController(wrapperClass, wrapperMethod, key, bytesMode, modes, reportPath, minLength, selectionStrategy, performanceWeight, securityWeight)
+    private val controller = ClassVisitorController(wrapperClass, wrapperMethod, key, bytesMode, modes, reportPath, minLength)
 
     override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor {
         when (descriptor) {

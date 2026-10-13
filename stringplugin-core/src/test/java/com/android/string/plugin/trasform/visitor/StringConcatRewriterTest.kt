@@ -54,10 +54,7 @@ class StringConcatRewriterTest {
             com.android.string.plugin.mode.BytesMode.STRING,
             listOf(com.android.string.plugin.mode.Mode.DEFAULT),
             null,
-            3,
-            com.android.string.plugin.mode.SelectionStrategy.RANDOM,
-            0.5,
-            0.5
+            3
         )
         ClassReader(inputWriter.toByteArray()).accept(visitor, 0)
 

@@ -2,7 +2,6 @@ package com.android.string.plugin.trasform
 
 import com.android.string.plugin.mode.BytesMode
 import com.android.string.plugin.mode.Mode
-import com.android.string.plugin.mode.SelectionStrategy
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -35,10 +34,7 @@ class StringConstantValueTest {
             BytesMode.STRING,
             listOf(Mode.DEFAULT),
             null,
-            3,
-            SelectionStrategy.RANDOM,
-            0.5,
-            0.5
+            3
         )
         ClassReader(inputWriter.toByteArray()).accept(visitor, 0)
 

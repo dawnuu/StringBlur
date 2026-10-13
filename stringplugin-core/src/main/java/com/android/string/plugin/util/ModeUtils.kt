@@ -21,8 +21,6 @@ object ModeUtils {
         return when (mode) {
             Mode.DEFAULT -> Constant.DEFAULT_IMPL_CLASS_NAME
             Mode.XOR -> Constant.XOR_IMPL_CLASS_NAME
-            Mode.REVERSE -> Constant.REVERSE_IMPL_CLASS_NAME
-            Mode.SHIFT -> Constant.SHIFT_IMPL_CLASS_NAME
             Mode.XOR_SHIFT -> Constant.XOR_SHIFT_IMPL_CLASS_NAME
             Mode.XOR_SIMD -> Constant.XOR_SIMD_IMPL_CLASS_NAME
             Mode.FAST_ROT -> Constant.FAST_ROT_IMPL_CLASS_NAME
@@ -33,8 +31,6 @@ object ModeUtils {
         return when (mode) {
             Mode.DEFAULT -> Constant.DEFAULT_IMPL_CLASS_FILE_PATH
             Mode.XOR -> Constant.XOR_IMPL_CLASS_FILE_PATH
-            Mode.REVERSE -> Constant.REVERSE_IMPL_CLASS_FILE_PATH
-            Mode.SHIFT -> Constant.SHIFT_IMPL_CLASS_FILE_PATH
             Mode.XOR_SHIFT -> Constant.XOR_SHIFT_IMPL_CLASS_FILE_PATH
             Mode.XOR_SIMD -> Constant.XOR_SIMD_IMPL_CLASS_FILE_PATH
             Mode.FAST_ROT -> Constant.FAST_ROT_IMPL_CLASS_FILE_PATH
@@ -45,8 +41,6 @@ object ModeUtils {
         return when (mode) {
             Mode.DEFAULT -> DefaultEncodeImpl()
             Mode.XOR -> XorEncodeImpl()
-            Mode.REVERSE -> ReverseEncodeImpl()
-            Mode.SHIFT -> ShiftEncodeImpl()
             Mode.XOR_SHIFT -> XorShiftEncodeImpl()
             Mode.XOR_SIMD -> XorSimdEncodeImpl()
             Mode.FAST_ROT -> FastRotEncodeImpl()
@@ -61,8 +55,6 @@ object ModeUtils {
         return when (mode) {
             Mode.DEFAULT -> DefaultEncodeImplFile()
             Mode.XOR -> XorEncodeImplFile()
-            Mode.REVERSE -> ReverseEncodeImplFile()
-            Mode.SHIFT -> ShiftEncodeImplFile()
             Mode.XOR_SHIFT -> XorShiftEncodeImplFile()
             Mode.XOR_SIMD -> XorSimdEncodeImplFile() // 使用专用SIMD文件生成器
             Mode.FAST_ROT -> FastRotEncodeImplFile()   // 使用专用旋转文件生成器
