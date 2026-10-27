@@ -1,45 +1,58 @@
 package com.android.string.plugin.report
 
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.LongAdder
 
-/** Visits only enqueue events; the build-service owner writes the report after instrumentation. */
+/**
+ * Visits only update counters, so memory stays constant regardless of project size.
+ * Only a bounded sample of skip/ignore diagnostics is kept, and string values are never recorded.
+ */
 class StringBlurReport(
     private val variantName: String,
     private val mode: String,
     private val bytesMode: String
 ) {
     private val startTime = System.currentTimeMillis()
-    private val events = ConcurrentLinkedQueue<Event>()
+    private val classesScanned = LongAdder()
+    private val classesSkipped = LongAdder()
+    private val stringsEncrypted = LongAdder()
+    private val stringsIgnored = LongAdder()
+    private val algorithmUsage = ConcurrentHashMap<String, LongAdder>()
+    private val lengthDistribution = ConcurrentHashMap<String, LongAdder>()
+    private val ignoredReasons = ConcurrentHashMap<String, LongAdder>()
+    private val samples = ConcurrentLinkedQueue<String>()
+    private val sampleCount = AtomicInteger()
 
     fun scanned(className: String) {
-        events.add(Event(Kind.SCANNED, "SCAN class=$className"))
+        classesScanned.increment()
     }
 
     fun skipped(className: String, reason: String) {
-        events.add(Event(Kind.SKIPPED, "SKIP class=$className reason=$reason"))
+        classesSkipped.increment()
+        sample("SKIP class=$className reason=$reason")
     }
 
     fun encrypted(className: String?, methodName: String?, value: String?, mode: String, bytesMode: String) {
-        val length = value?.length ?: 0
-        events.add(Event(
-            Kind.ENCRYPTED,
-            "ENCRYPT class=${className.orEmpty()} method=${methodName.orEmpty()} mode=$mode bytesMode=$bytesMode length=$length value=${sanitize(value)}",
-            mode,
-            length
-        ))
+        stringsEncrypted.increment()
+        algorithmUsage.computeIfAbsent(mode) { LongAdder() }.increment()
+        lengthDistribution.computeIfAbsent(lengthCategory(value?.length ?: 0)) { LongAdder() }.increment()
     }
 
     fun ignored(className: String?, methodName: String?, value: Any?, reason: String) {
-        events.add(Event(
-            Kind.IGNORED,
-            "IGNORE class=${className.orEmpty()} method=${methodName.orEmpty()} reason=$reason value=${sanitize(value)}"
-        ))
+        stringsIgnored.increment()
+        ignoredReasons.computeIfAbsent(reason) { LongAdder() }.increment()
+        sample("IGNORE class=${className.orEmpty()} method=${methodName.orEmpty()} reason=$reason")
+    }
+
+    private fun sample(line: String) {
+        if (sampleCount.getAndIncrement() < MAX_SAMPLES) samples.add(line)
     }
 
     /** Called once after all visits have completed. */
     fun writeTo(file: File) {
-        val stats = Stats()
         val duration = System.currentTimeMillis() - startTime
         file.parentFile?.mkdirs()
         file.bufferedWriter().use { writer ->
@@ -49,46 +62,29 @@ class StringBlurReport(
                 "Generated: $timestamp\n" +
                 "Variant: $variantName\n" +
                 "Config: $mode ($bytesMode mode)\n" +
-                "========================================\n\n" +
-                "Events:\n"
+                "========================================\n\n"
             )
-            while (true) {
-                val event = events.poll() ?: break
-                writer.write(event.line + "\n")
-                when (event.kind) {
-                    Kind.SCANNED -> stats.classesScanned++
-                    Kind.SKIPPED -> stats.classesSkipped++
-                    Kind.IGNORED -> stats.stringsIgnored++
-                    Kind.ENCRYPTED -> {
-                        stats.stringsEncrypted++
-                        stats.algorithmUsage.merge(event.mode, 1, Int::plus)
-                        val category = when {
-                            event.length == 0 -> "empty"
-                            event.length <= 8 -> "1-8"
-                            event.length <= 20 -> "9-20"
-                            event.length <= 50 -> "21-50"
-                            event.length <= 100 -> "51-100"
-                            event.length <= 200 -> "101-200"
-                            else -> "200+"
-                        }
-                        stats.lengthDistribution.merge(category, 1, Int::plus)
-                    }
-                }
+            val total = sampleCount.get()
+            if (total > 0) {
+                writer.write("Skip/Ignore Samples (showing ${minOf(total, MAX_SAMPLES)} of $total):\n")
+                samples.forEach { writer.write(it + "\n") }
             }
-            writer.write(generateSummary(stats, duration))
+            writer.write(generateSummary(duration))
         }
     }
 
-    private fun sanitize(value: Any?): String {
-        return value?.toString()
-            ?.replace("\\", "\\\\")
-            ?.replace("\n", "\\n")
-            ?.replace("\r", "\\r")
-            ?.take(200)
-            ?: ""
+    private fun lengthCategory(length: Int) = when {
+        length == 0 -> "empty"
+        length <= 8 -> "1-8"
+        length <= 20 -> "9-20"
+        length <= 50 -> "21-50"
+        length <= 100 -> "51-100"
+        length <= 200 -> "101-200"
+        else -> "200+"
     }
 
-    private fun generateSummary(stats: Stats, duration: Long): String = buildString {
+    private fun generateSummary(duration: Long): String = buildString {
+        val encrypted = stringsEncrypted.sum()
         appendLine()
         appendLine("========================================")
         appendLine("PERFORMANCE SUMMARY")
@@ -99,27 +95,35 @@ class StringBlurReport(
 
         // 总体统计
         appendLine("Overall Statistics:")
-        appendLine("  Classes Scanned: ${stats.classesScanned}")
-        appendLine("  Classes Skipped: ${stats.classesSkipped}")
-        appendLine("  Strings Encrypted: ${stats.stringsEncrypted}")
-        appendLine("  Strings Ignored: ${stats.stringsIgnored}")
+        appendLine("  Classes Scanned: ${classesScanned.sum()}")
+        appendLine("  Classes Skipped: ${classesSkipped.sum()}")
+        appendLine("  Strings Encrypted: $encrypted")
+        appendLine("  Strings Ignored: ${stringsIgnored.sum()}")
         appendLine()
 
+        // 忽略原因分布
+        if (ignoredReasons.isNotEmpty()) {
+            appendLine("Ignored Reasons:")
+            ignoredReasons.mapValues { it.value.sum() }.toList().sortedByDescending { it.second }
+                .forEach { (reason, count) -> appendLine("  $reason: $count") }
+            appendLine()
+        }
+
         // 算法使用分布
-        if (stats.algorithmUsage.isNotEmpty()) {
+        if (algorithmUsage.isNotEmpty()) {
             appendLine("Algorithm Distribution:")
-            val sortedAlgorithms = stats.algorithmUsage.toList().sortedByDescending { it.second }
+            val sortedAlgorithms = algorithmUsage.mapValues { it.value.sum() }.toList().sortedByDescending { it.second }
             sortedAlgorithms.forEach { (mode, count) ->
-                val percentage = (count * 100.0 / stats.stringsEncrypted).toInt()
+                val percentage = (count * 100.0 / encrypted).toInt()
                 appendLine("  $mode: $count strings ($percentage%)")
             }
             appendLine()
         }
 
         // 字符串长度分布
-        if (stats.lengthDistribution.isNotEmpty()) {
+        if (lengthDistribution.isNotEmpty()) {
             appendLine("String Length Distribution:")
-            val sortedLengths = stats.lengthDistribution.toList().sortedBy {
+            val sortedLengths = lengthDistribution.mapValues { it.value.sum() }.toList().sortedBy {
                 when (it.first) {
                     "empty" -> 0
                     "1-8" -> 1
@@ -146,25 +150,11 @@ class StringBlurReport(
             else -> appendLine("  ⭐⭐ Slow (>10s)")
         }
 
-        val encryptRate = if (duration > 0) (stats.stringsEncrypted * 1000.0 / duration) else 0.0
+        val encryptRate = if (duration > 0) (encrypted * 1000.0 / duration) else 0.0
         appendLine("  Encryption Rate: ${encryptRate.toInt()} strings/sec")
     }
 
-    private enum class Kind { SCANNED, SKIPPED, ENCRYPTED, IGNORED }
-
-    private data class Event(
-        val kind: Kind,
-        val line: String,
-        val mode: String = "",
-        val length: Int = 0
-    )
-
-    private data class Stats(
-        var classesScanned: Int = 0,
-        var classesSkipped: Int = 0,
-        var stringsEncrypted: Int = 0,
-        var stringsIgnored: Int = 0,
-        val algorithmUsage: MutableMap<String, Int> = mutableMapOf(),
-        val lengthDistribution: MutableMap<String, Int> = mutableMapOf()
-    )
+    private companion object {
+        const val MAX_SAMPLES = 200
+    }
 }

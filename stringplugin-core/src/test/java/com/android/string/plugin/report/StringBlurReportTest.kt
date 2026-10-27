@@ -57,8 +57,11 @@ class StringBlurReportTest {
             assertTrue(text.contains("Strings Ignored: 2"))
             assertTrue(text.contains("reason=emptyString"))
             assertTrue(text.contains("reason=tooShort"))
-            assertTrue(text.contains("value=hello\\nworld\\\\!"))
-            assertTrue(text.indexOf("ENCRYPT ") < text.indexOf("PERFORMANCE SUMMARY"))
+            assertFalse("String values must never be written", text.contains("hello"))
+            assertFalse(text.contains("ENCRYPT "))
+            assertTrue(text.contains("emptyString: 1"))
+            assertTrue(text.contains("tooShort: 1"))
+            assertTrue(text.indexOf("IGNORE ") < text.indexOf("PERFORMANCE SUMMARY"))
         } finally {
             directory.deleteRecursively()
         }
@@ -82,8 +85,11 @@ class StringBlurReportTest {
             assertFalse(file.exists())
             report.writeTo(file)
             val text = file.readText()
-            assertEquals(800, text.lineSequence().count { it.startsWith("ENCRYPT ") })
-            assertEquals(800, text.lineSequence().count { it.startsWith("IGNORE ") })
+            assertEquals(0, text.lineSequence().count { it.startsWith("ENCRYPT ") })
+            // Diagnostics are a bounded sample; totals still come from exact counters.
+            assertEquals(200, text.lineSequence().count { it.startsWith("IGNORE ") })
+            assertTrue(text.contains("showing 200 of 800"))
+            assertTrue(text.contains("tooShort: 800"))
             assertTrue(text.contains("Classes Scanned: 8"))
             assertTrue(text.contains("Strings Encrypted: 800"))
             assertTrue(text.contains("Strings Ignored: 800"))
