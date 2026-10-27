@@ -6,6 +6,7 @@ import com.android.build.api.instrumentation.ClassData
 import com.android.string.plugin.trasform.parameters.StringBlurInstrumentationParameters
 import com.android.string.plugin.util.KeyDerivation
 import org.objectweb.asm.ClassVisitor
+import java.util.concurrent.ConcurrentHashMap
 
 abstract class StringBlurClassTransform :
     AsmClassVisitorFactory<StringBlurInstrumentationParameters> {
@@ -46,7 +47,7 @@ abstract class StringBlurClassTransform :
                 nextClassVisitor,
                 wrapperClass.get(),
                 wrapperMethod.get(),
-                KeyDerivation.master(seed.get()),
+                masterKeys.computeIfAbsent(seed.get(), KeyDerivation::master),
                 bytesMode.get(),
                 modes.get(),
                 report,
@@ -66,5 +67,11 @@ abstract class StringBlurClassTransform :
             }
         }
         return false
+    }
+
+    companion object {
+        // The factory must stay a managed type (no instance fields) so AGP can isolate it,
+        // so the per-seed master key is cached here instead of being re-derived for every class.
+        private val masterKeys = ConcurrentHashMap<String, IntArray>()
     }
 }
