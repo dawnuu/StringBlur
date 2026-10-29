@@ -47,7 +47,7 @@ mavenPublishing {
     pom {
         name = "StringBlur Common"
         description = "Shared APIs for the StringBlur Gradle plugin."
-        url = "https://github.com/dawnuu/StringBlur"
+        url = "https://github.com/erliangv/StringBlur"
         licenses {
             license {
                 name = "Apache License, Version 2.0"
@@ -61,13 +61,13 @@ mavenPublishing {
                 name = "dawnuu"
                 email = "dawnuu@126.com"
                 organization = "dawnuu"
-                organizationUrl = "https://github.com/dawnuu"
+                organizationUrl = "https://github.com/erliangv"
             }
         }
         scm {
-            url = "https://github.com/dawnuu/StringBlur"
-            connection = "scm:git:https://github.com/dawnuu/StringBlur.git"
-            developerConnection = "scm:git:ssh://git@github.com/dawnuu/StringBlur.git"
+            url = "https://github.com/erliangv/StringBlur"
+            connection = "scm:git:https://github.com/erliangv/StringBlur.git"
+            developerConnection = "scm:git:ssh://git@github.com/erliangv/StringBlur.git"
         }
     }
 }

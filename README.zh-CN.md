@@ -174,7 +174,7 @@ StringBlur 是字符串混淆，不是强加密。解密逻辑和所需的材料
 
 ## 相关项目
 
-- [AabResGuard](https://github.com/dawnuu/AabResGuard) — Android AAB 资源混淆工具。
+- [AabResGuard](https://github.com/erliangv/AabResGuard) — Android AAB 资源混淆工具。
 
 ## 许可证
 

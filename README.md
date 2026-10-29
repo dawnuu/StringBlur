@@ -175,7 +175,7 @@ StringBlur is string obfuscation, not strong encryption. The decryption logic an
 
 ## Related project
 
-- [AabResGuard](https://github.com/dawnuu/AabResGuard) — Android AAB resource obfuscation tool.
+- [AabResGuard](https://github.com/erliangv/AabResGuard) — Android AAB resource obfuscation tool.
 
 ## License
 
